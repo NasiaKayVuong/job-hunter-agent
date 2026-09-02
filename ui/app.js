@@ -127,12 +127,208 @@ $("setup-form").addEventListener("submit", async (e) => {
       body: JSON.stringify(payload),
     });
     if (!res.ok) throw new Error(await res.text());
-    showStatus("Saved. You can close this tab and open the folder in Claude Code.", "ok");
+    showStatus("Saved. Ask Claude to find jobs whenever you're ready.", "ok");
     await loadExisting();
     fileInput.value = "";
   } catch (err) {
     showStatus("Failed to save: " + err.message, "err");
   }
 });
+
+// ---------- Tabs ----------
+
+document.querySelectorAll(".tab-btn").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".tab-btn").forEach((b) => b.classList.remove("active"));
+    document.querySelectorAll(".tab-panel").forEach((p) => (p.hidden = true));
+    btn.classList.add("active");
+    $("panel-" + btn.dataset.tab).hidden = false;
+    if (btn.dataset.tab === "connections") loadGoogleStatus();
+    if (btn.dataset.tab === "applications") loadApplications();
+    if (btn.dataset.tab === "calendar") loadCalendar();
+  });
+});
+
+// ---------- Connections ----------
+
+async function loadGoogleStatus() {
+  const el = $("google-status");
+  const btn = $("google-connect-btn");
+  el.textContent = "Checking…";
+  try {
+    const res = await fetch("/api/google/status");
+    const data = await res.json();
+    if (!data.installed) {
+      el.textContent = "Not installed. Run: pip install -r requirements.txt";
+      btn.disabled = true;
+    } else if (!data.client_secret_present) {
+      el.textContent = "No OAuth client set up yet. See README.md → Calendar and tracking.";
+      btn.textContent = "Connect Google account";
+      btn.disabled = false;
+    } else if (data.connected) {
+      el.textContent = "✓ Connected";
+      btn.textContent = "Reconnect";
+      btn.disabled = false;
+    } else {
+      el.textContent = "Client set up, not yet authorized.";
+      btn.textContent = "Connect Google account";
+      btn.disabled = false;
+    }
+  } catch (e) {
+    el.textContent = "Couldn't check status: " + e.message;
+  }
+}
+
+$("google-connect-btn").addEventListener("click", async () => {
+  const btn = $("google-connect-btn");
+  btn.disabled = true;
+  btn.textContent = "Waiting on browser authorization…";
+  try {
+    const res = await fetch("/api/google/connect", { method: "POST" });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    showStatus("Google account connected.", "ok");
+  } catch (e) {
+    showStatus("Connection failed: " + e.message, "err");
+  } finally {
+    btn.disabled = false;
+    await loadGoogleStatus();
+  }
+});
+
+// ---------- Applications ----------
+
+async function loadApplications() {
+  const tbody = document.querySelector("#applications-table tbody");
+  const empty = $("applications-empty");
+  tbody.innerHTML = "";
+  empty.hidden = true;
+  try {
+    const res = await fetch("/api/applications");
+    const data = await res.json();
+    if (data.error) {
+      empty.textContent = data.error;
+      empty.hidden = false;
+      return;
+    }
+    const rows = data.applications || [];
+    if (rows.length === 0) {
+      empty.hidden = false;
+      return;
+    }
+    for (const r of rows) {
+      const tr = document.createElement("tr");
+      const cells = [
+        r.date_applied, r.company, r.title, r.source,
+        r.location, r.job_type, r.skill_match, r.current_stage,
+      ];
+      for (const c of cells) {
+        const td = document.createElement("td");
+        td.textContent = c || "";
+        tr.appendChild(td);
+      }
+      tbody.appendChild(tr);
+    }
+  } catch (e) {
+    empty.textContent = "Couldn't load applications: " + e.message;
+    empty.hidden = false;
+  }
+}
+
+$("refresh-applications-btn").addEventListener("click", loadApplications);
+
+// ---------- Calendar ----------
+
+async function loadCalendar() {
+  const list = $("calendar-list");
+  const empty = $("calendar-empty");
+  list.innerHTML = "";
+  empty.hidden = true;
+  try {
+    const res = await fetch("/api/calendar/upcoming");
+    const data = await res.json();
+    if (data.error) {
+      empty.textContent = data.error;
+      empty.hidden = false;
+      return;
+    }
+    const events = data.events || [];
+    if (events.length === 0) {
+      empty.hidden = false;
+      return;
+    }
+    for (const ev of events) {
+      const li = document.createElement("li");
+      const when = new Date(ev.start).toLocaleString();
+      li.innerHTML = `<strong>${ev.summary || "(no title)"}</strong><br><span class="hint">${when}</span>`;
+      if (ev.html_link) {
+        const a = document.createElement("a");
+        a.href = ev.html_link;
+        a.target = "_blank";
+        a.rel = "noopener";
+        a.textContent = " Open in Calendar";
+        li.appendChild(a);
+      }
+      list.appendChild(li);
+    }
+  } catch (e) {
+    empty.textContent = "Couldn't load calendar: " + e.message;
+    empty.hidden = false;
+  }
+}
+
+$("refresh-calendar-btn").addEventListener("click", loadCalendar);
+
+// ---------- Drive resume import ----------
+
+$("import-drive-btn").addEventListener("click", async () => {
+  const picker = $("drive-picker");
+  const list = $("drive-picker-list");
+  picker.hidden = false;
+  list.innerHTML = "<li>Searching Drive…</li>";
+  try {
+    const res = await fetch("/api/drive/resumes");
+    const data = await res.json();
+    if (data.error) {
+      list.innerHTML = `<li>${data.error}</li>`;
+      return;
+    }
+    const files = data.files || [];
+    if (files.length === 0) {
+      list.innerHTML = "<li>No resume-like files found in Drive.</li>";
+      return;
+    }
+    list.innerHTML = "";
+    for (const f of files) {
+      const li = document.createElement("li");
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "secondary";
+      btn.textContent = `${f.name} (${new Date(f.modifiedTime).toLocaleDateString()})`;
+      btn.addEventListener("click", () => importDriveResume(f.id));
+      li.appendChild(btn);
+      list.appendChild(li);
+    }
+  } catch (e) {
+    list.innerHTML = `<li>Couldn't search Drive: ${e.message}</li>`;
+  }
+});
+
+async function importDriveResume(fileId) {
+  try {
+    const res = await fetch("/api/drive/import-resume", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ file_id: fileId }),
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    showStatus(`Imported "${data.saved_as}" from Drive.`, "ok");
+    $("drive-picker").hidden = true;
+    await loadExisting();
+  } catch (e) {
+    showStatus("Import failed: " + e.message, "err");
+  }
+}
 
 loadExisting();

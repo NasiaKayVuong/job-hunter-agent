@@ -1,7 +1,10 @@
 # Personal data — never committed
 config/preferences.json
+config/tracker.json
 data/resume/*
 !data/resume/.gitkeep
+data/google/*
+!data/google/.gitkeep
 applications/*
 !applications/README.md
 

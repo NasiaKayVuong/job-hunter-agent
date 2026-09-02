@@ -7,8 +7,9 @@ rules whenever the user asks you to find jobs, draft applications, or apply.
 
 - Preferences live in `config/preferences.json` (schema/example in
   `config/preferences.example.json`). Read this before searching. If it doesn't
-  exist yet, tell the user to run the UI (`python ui/server.py`, then
-  `http://localhost:8787`) or create it by hand from the example file.
+  exist yet, tell the user to run the desktop app (`python app.py`, or
+  `python ui/server.py` for the browser-tab version) and use the Setup tab, or
+  create it by hand from the example file.
 - The user's resume is in `data/resume/`. Read it before ranking or drafting
   anything — matching and tailoring should be grounded in what it actually says,
   never invented.
@@ -50,6 +51,59 @@ once" override — if the user wants something submitted, they click it.
    was drafted, what was filled in and where it stopped. This is the user's audit
    trail — keep it honest, including partial failures (a site that blocked
    automation, a form that couldn't be completed, etc.).
+7. **Track.** After the user confirms they actually submitted an application
+   (never before — an autofilled-but-unsubmitted form isn't a real application),
+   record it with `python tools/tracker.py add ...`: company, title, job URL,
+   source (the platform/site actually applied on), location, job type
+   (remote/hybrid/onsite), which resume and cover letter version were used
+   (reference the files in `applications/<company>-<role-slug>/`), and a rough
+   skill-match assessment between the JD and the resume (state it as a rough
+   judgment, e.g. "7/10 — strong on React/TypeScript, light on the required Go
+   experience", never as a precise score). If the user asks you to also save
+   the tailored resume/cover letter to Drive (optional — local files under
+   `applications/` are the default, this is not required), use
+   `python tools/drive.py save-draft --path ... --name ... --kind resume` (or
+   `--kind cover_letter`) — this lands in the "Resumes"/"Cover Letters"
+   subfolder of the "Job Tracker" Drive folder (see `tools/drive.py`
+   `ensure_folders()`), the same folder the tracker Sheet lives in, and always
+   creates a new file rather than overwriting anything.
+
+## Calendar and tracking
+
+- **Scheduling an interview.** When the user tells you about a scheduled
+  interview (or you find one while scanning email — see below), create a
+  calendar event with `python tools/gcal.py create --summary ... --start
+  ... --end ...`. Use a clear summary ("Interview: <Company> — <Round>").
+  **Never add attendees or send an invite** — the tool has no attendees
+  parameter at all, by design. If the user wants to invite someone, tell them
+  to do that themselves in Google Calendar.
+- **Checking status.** On request (not proactively/automatically), scan for
+  application status updates with `python tools/gmail_scan.py scan`. This is
+  read-only — it never sends, replies, or modifies anything in Gmail. It
+  returns *candidates* with a guessed status (possible interview / rejection /
+  offer / unclassified). Treat every guess as unverified: show the candidates
+  to the user, ask which ones are real updates and what the actual new stage
+  is, and only then call `python tools/tracker.py update-stage --row N --stage
+  "..."` for the ones the user confirms. Never auto-update the tracker from a
+  guess alone.
+- **Using the tracker for better search.** Before ranking a new shortlist, you
+  can read the full tracker with `python tools/tracker.py list` and look for
+  patterns — which titles, sources, locations, or resume/cover-letter versions
+  are correlating with interviews or later stages versus early rejections.
+  Mention any pattern you find as a rationale, not as a hard rule (a handful of
+  data points is not statistically strong evidence — say so if the sample is
+  small).
+- The tracker is a Google Sheet inside a "Job Tracker" folder in the user's
+  own Drive (folder + Sheet created automatically on first use via
+  `tools/drive.py ensure_folders()` and `tools/tracker.py ensure_sheet()`, IDs
+  cached in `config/tracker.json`, gitignored). It's meant to be opened and
+  edited by the user directly too — don't treat it as a Claude-only data store.
+- The desktop app (`python app.py`) is a viewer/input surface only — Setup,
+  Connections status, the Applications table, and upcoming Calendar events.
+  It never searches, drafts, or autofills anything itself; that's exclusively
+  Claude's job, per this file. Don't add functionality to `app.py`/`ui/` that
+  duplicates the workflow above — the app reads/displays what Claude and
+  these tools produce.
 
 ## Boundaries
 
@@ -64,3 +118,14 @@ once" override — if the user wants something submitted, they click it.
   tell the user rather than trying to work around it.
 - If the resume or preferences file is missing, ask the user to set them up via
   the UI rather than guessing.
+- Never add calendar attendees or otherwise send a calendar invite — not
+  possible through `tools/gcal.py` by design, and don't work around that
+  by calling the Calendar API some other way.
+- Gmail access is read-only search (`tools/gmail_scan.py`). Never attempt to
+  send, reply to, or modify email — there is no code path for it here, and it
+  should stay that way.
+- Don't run `tools/gmail_scan.py` or touch the tracker without being asked in
+  that session — no proactive/background scanning.
+- `tools/drive.py` is create-only and read-only — there is no update/
+  overwrite/delete function for Drive files anywhere in this repo. Never edit
+  or delete a file in the user's Drive that this tool didn't itself create.
