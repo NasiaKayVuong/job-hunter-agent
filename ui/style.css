@@ -1,0 +1,134 @@
+:root {
+  color-scheme: light dark;
+  --bg: #f7f7f5;
+  --fg: #1c1c1e;
+  --muted: #6b6b70;
+  --card: #ffffff;
+  --border: #e2e2e0;
+  --accent: #3d5a80;
+  --accent-fg: #ffffff;
+  --ok-bg: #e6f4ea;
+  --ok-fg: #1e6b34;
+  --err-bg: #fbe9e7;
+  --err-fg: #a3312a;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #16171a;
+    --fg: #eceef0;
+    --muted: #9a9ca1;
+    --card: #1f2023;
+    --border: #2e3033;
+    --accent: #7fa5d1;
+    --accent-fg: #10151c;
+    --ok-bg: #103621;
+    --ok-fg: #7ad39a;
+    --err-bg: #3a1a17;
+    --err-fg: #f0a29c;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  line-height: 1.45;
+}
+
+main {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 2.5rem 1.25rem 4rem;
+}
+
+header h1 {
+  font-size: 1.5rem;
+  margin: 0 0 0.35rem;
+}
+
+.subtitle {
+  color: var(--muted);
+  margin: 0 0 1.5rem;
+  font-size: 0.92rem;
+}
+
+.status {
+  padding: 0.7rem 0.9rem;
+  border-radius: 8px;
+  margin-bottom: 1.25rem;
+  font-size: 0.9rem;
+}
+.status.ok { background: var(--ok-bg); color: var(--ok-fg); }
+.status.err { background: var(--err-bg); color: var(--err-fg); }
+
+section {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1.1rem 1.25rem 1.25rem;
+  margin-bottom: 1rem;
+}
+
+section h2 {
+  font-size: 0.95rem;
+  margin: 0 0 0.75rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.hint {
+  color: var(--muted);
+  font-size: 0.85rem;
+  margin: 0.2rem 0 0.6rem;
+}
+
+label {
+  display: block;
+  font-size: 0.9rem;
+  margin-bottom: 0.75rem;
+}
+
+label:last-child { margin-bottom: 0; }
+
+label.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+label.checkbox input { margin: 0; }
+
+input[type="text"],
+input[type="number"],
+input[type="file"],
+textarea {
+  width: 100%;
+  margin-top: 0.3rem;
+  padding: 0.5rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--fg);
+  font: inherit;
+}
+
+textarea { resize: vertical; }
+
+button[type="submit"] {
+  width: 100%;
+  padding: 0.75rem;
+  border: none;
+  border-radius: 8px;
+  background: var(--accent);
+  color: var(--accent-fg);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+button[type="submit"]:hover { opacity: 0.92; }

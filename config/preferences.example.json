@@ -1,0 +1,29 @@
+{
+  "target_titles": ["Product Manager", "Senior Product Manager"],
+  "seniority": "match my resume",
+  "locations": {
+    "remote": true,
+    "hybrid_or_onsite_areas": ["Austin, TX"],
+    "open_to_relocation": true
+  },
+  "compensation": {
+    "currency": "USD",
+    "floor": 130000,
+    "flexible_down_to": 120000,
+    "basis": "base salary"
+  },
+  "employment_type": ["full_time"],
+  "industries_excluded": ["tobacco", "gambling"],
+  "industries_preferred": ["climate", "education"],
+  "dealbreakers": [
+    "no unpaid overtime expectations",
+    "no contract or C2C arrangements"
+  ],
+  "sources": {
+    "job_boards": true,
+    "company_career_pages": true,
+    "niche_boards": [],
+    "company_watchlist": []
+  },
+  "notes": "Free text for anything else Claude should know when matching or drafting."
+}

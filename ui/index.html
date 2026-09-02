@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Job Hunter Agent — Setup</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<main>
+  <header>
+    <h1>Job Hunter Agent</h1>
+    <p class="subtitle">Set your resume and preferences. Claude reads these when you ask it to find or apply to jobs — nothing here is ever committed to git or sent anywhere by this page itself.</p>
+  </header>
+
+  <div id="status" class="status" hidden></div>
+
+  <form id="setup-form">
+    <section>
+      <h2>Resume</h2>
+      <p class="hint">PDF or DOCX. Used to match roles and tailor applications — Claude reads this directly, so keep it current.</p>
+      <input type="file" id="resume" name="resume" accept=".pdf,.doc,.docx" />
+      <p id="resume-current" class="hint"></p>
+    </section>
+
+    <section>
+      <h2>Target role</h2>
+      <label>Target title(s)
+        <input type="text" id="target_titles" placeholder="e.g. Senior Full Stack Engineer, Staff Engineer" />
+      </label>
+      <label>Seniority
+        <input type="text" id="seniority" placeholder="e.g. match my resume, or: Senior only" />
+      </label>
+    </section>
+
+    <section>
+      <h2>Location</h2>
+      <label class="checkbox"><input type="checkbox" id="remote" /> Open to remote</label>
+      <label>Hybrid/onsite area(s)
+        <input type="text" id="hybrid_areas" placeholder="e.g. Chicago, IL" />
+      </label>
+      <label class="checkbox"><input type="checkbox" id="relocation" /> Open to relocation</label>
+    </section>
+
+    <section>
+      <h2>Compensation</h2>
+      <label>Floor (base salary, USD)
+        <input type="number" id="comp_floor" placeholder="130000" min="0" step="1000" />
+      </label>
+      <label>Flexible down to
+        <input type="number" id="comp_flex" placeholder="120000" min="0" step="1000" />
+      </label>
+    </section>
+
+    <section>
+      <h2>Employment type</h2>
+      <label class="checkbox"><input type="checkbox" id="et_full_time" checked /> Full-time</label>
+      <label class="checkbox"><input type="checkbox" id="et_contract" /> Contract</label>
+      <label class="checkbox"><input type="checkbox" id="et_part_time" /> Part-time</label>
+    </section>
+
+    <section>
+      <h2>Industries</h2>
+      <label>Excluded (comma-separated)
+        <input type="text" id="industries_excluded" placeholder="e.g. tobacco, gambling" />
+      </label>
+      <label>Preferred (comma-separated, optional)
+        <input type="text" id="industries_preferred" placeholder="e.g. climate, healthtech" />
+      </label>
+    </section>
+
+    <section>
+      <h2>Dealbreakers</h2>
+      <label>One per line
+        <textarea id="dealbreakers" rows="3" placeholder="No return-to-office mandates&#10;No contract/C2C"></textarea>
+      </label>
+    </section>
+
+    <section>
+      <h2>Sources</h2>
+      <label class="checkbox"><input type="checkbox" id="src_boards" checked /> Job boards (LinkedIn, Indeed, etc.)</label>
+      <label class="checkbox"><input type="checkbox" id="src_company" checked /> Company career pages</label>
+      <label>Niche/industry boards (comma-separated, optional)
+        <input type="text" id="niche_boards" placeholder="e.g. Wellfound, Built In" />
+      </label>
+      <label>Company watchlist (comma-separated, optional)
+        <input type="text" id="company_watchlist" placeholder="Specific companies to check directly" />
+      </label>
+    </section>
+
+    <section>
+      <h2>Notes</h2>
+      <label>Anything else Claude should know
+        <textarea id="notes" rows="3"></textarea>
+      </label>
+    </section>
+
+    <button type="submit">Save</button>
+  </form>
+</main>
+<script src="app.js"></script>
+</body>
+</html>

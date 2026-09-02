@@ -1,0 +1,14 @@
+# Personal data — never committed
+config/preferences.json
+data/resume/*
+!data/resume/.gitkeep
+applications/*
+!applications/README.md
+
+# Python
+__pycache__/
+*.pyc
+
+# OS
+.DS_Store
+Thumbs.db
