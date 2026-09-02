@@ -21,6 +21,7 @@ Usage:
 import argparse
 import io
 import json
+import mimetypes
 import sys
 from pathlib import Path
 
@@ -133,9 +134,18 @@ def import_resume(file_id):
     buf = io.BytesIO()
     if mime in GOOGLE_NATIVE_MIMES:
         request = service.files().export_media(fileId=file_id, mimeType=GOOGLE_DOC_EXPORT_MIME)
-        name = name if name.lower().endswith(".pdf") else f"{name}.pdf"
+        mime = GOOGLE_DOC_EXPORT_MIME
     else:
         request = service.files().get_media(fileId=file_id)
+
+    # Drive's `name` field is independent of mimeType — a real PDF/DOCX can
+    # have a name with no extension at all. Force the right one on regardless
+    # of what's already there, so the saved file is actually openable/
+    # recognizable as what it is.
+    ext = mimetypes.guess_extension(mime) or ""
+    name = name.strip()
+    if ext and not name.lower().endswith(ext):
+        name = f"{name}{ext}"
 
     downloader = MediaIoBaseDownload(buf, request)
     done = False
