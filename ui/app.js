@@ -34,6 +34,43 @@ $("toggle-width-btn").addEventListener("click", () => {
   }
 });
 
+// ---------- Light/dark theme toggle ----------
+// Defaults to following the OS/browser preference (no attribute set); once
+// toggled, pins an explicit choice (data-theme="light"|"dark") that wins
+// over the system preference, persisted across reloads.
+
+function applyThemeMode(theme) {
+  if (theme) {
+    document.documentElement.setAttribute("data-theme", theme);
+  } else {
+    document.documentElement.removeAttribute("data-theme");
+  }
+  const isDark = theme ? theme === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
+  $("toggle-theme-btn").textContent = isDark ? "☀️ Light" : "🌙 Dark";
+}
+
+(function initThemeMode() {
+  let theme = null;
+  try {
+    theme = localStorage.getItem("jha-theme"); // "light" | "dark" | null (follow system)
+  } catch (e) {
+    // localStorage unavailable — just follow the system preference.
+  }
+  applyThemeMode(theme);
+})();
+
+$("toggle-theme-btn").addEventListener("click", () => {
+  const current = document.documentElement.getAttribute("data-theme");
+  const currentIsDark = current ? current === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
+  const next = currentIsDark ? "light" : "dark";
+  applyThemeMode(next);
+  try {
+    localStorage.setItem("jha-theme", next);
+  } catch (e) {
+    // Fine if this doesn't persist — it still works for the current session.
+  }
+});
+
 function splitList(value) {
   return value
     .split(",")
@@ -332,11 +369,13 @@ $("scan-email-btn").addEventListener("click", async () => {
   btn.disabled = true;
   btn.textContent = "Scanning…";
   try {
-    const res = await fetch("/api/gmail/scan");
+    const days = $("scan-days-select").value;
+    const res = await fetch("/api/gmail/scan?days=" + encodeURIComponent(days));
     const data = await res.json();
     if (data.error) throw new Error(data.error);
     const candidates = data.candidates || [];
     if (candidates.length === 0) {
+      empty.textContent = `Nothing found in the last ${days} days.`;
       empty.hidden = false;
       return;
     }

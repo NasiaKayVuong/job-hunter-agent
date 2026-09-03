@@ -14,7 +14,7 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     --bg: #16171a;
     --fg: #eceef0;
     --muted: #9a9ca1;
@@ -27,6 +27,21 @@
     --err-bg: #3a1a17;
     --err-fg: #f0a29c;
   }
+}
+
+/* Explicit override via the theme toggle, regardless of system preference */
+:root[data-theme="dark"] {
+  --bg: #16171a;
+  --fg: #eceef0;
+  --muted: #9a9ca1;
+  --card: #1f2023;
+  --border: #2e3033;
+  --accent: #7fa5d1;
+  --accent-fg: #10151c;
+  --ok-bg: #103621;
+  --ok-fg: #7ad39a;
+  --err-bg: #3a1a17;
+  --err-fg: #f0a29c;
 }
 
 * { box-sizing: border-box; }
@@ -93,6 +108,13 @@ header h1 {
   overflow-x: auto;
 }
 
+.nav-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+#toggle-theme-btn,
 #toggle-width-btn {
   margin: 0 0 0.4rem;
   white-space: nowrap;
@@ -157,6 +179,23 @@ label.checkbox {
 }
 
 label.checkbox input { margin: 0; }
+
+label.inline-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0 0.6rem 0.4rem 0;
+}
+
+label.inline-label select {
+  padding: 0.35rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--fg);
+  font: inherit;
+  font-size: 0.85rem;
+}
 
 input[type="text"],
 input[type="number"],

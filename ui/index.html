@@ -21,7 +21,10 @@
       <button class="tab-btn" data-tab="applications" type="button">Applications</button>
       <button class="tab-btn" data-tab="calendar" type="button">Calendar</button>
     </div>
-    <button id="toggle-width-btn" class="secondary" type="button" title="Widen the window content so wide tables don't need horizontal scrolling">⤢ Expand view</button>
+    <div class="nav-actions">
+      <button id="toggle-theme-btn" class="secondary" type="button" title="Switch between light and dark">🌙 Dark</button>
+      <button id="toggle-width-btn" class="secondary" type="button" title="Widen the window content so wide tables don't need horizontal scrolling">⤢ Expand view</button>
+    </div>
   </nav>
 
   <div id="status" class="status" hidden></div>
@@ -172,9 +175,18 @@
     <section>
       <h2>Check email for updates</h2>
       <p class="hint">Reads recent email (read-only — never sends or modifies anything) for likely interview/rejection/offer messages. The status shown is a rough keyword guess, not verified — read each one and use the Stage dropdown above to actually update the tracker.</p>
+      <label class="inline-label">Look back
+        <select id="scan-days-select">
+          <option value="7">7 days</option>
+          <option value="14">14 days</option>
+          <option value="30" selected>30 days</option>
+          <option value="60">60 days</option>
+          <option value="90">90 days</option>
+        </select>
+      </label>
       <button type="button" id="scan-email-btn" class="secondary">Scan email for updates</button>
       <ul id="email-scan-list" class="picker-list"></ul>
-      <p id="email-scan-empty" class="hint" hidden>Nothing found in the last 30 days.</p>
+      <p id="email-scan-empty" class="hint" hidden>Nothing found in that time range.</p>
     </section>
   </section>
 

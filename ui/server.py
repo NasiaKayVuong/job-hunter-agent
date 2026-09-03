@@ -20,6 +20,7 @@ import mimetypes
 import sys
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+from urllib.parse import urlparse, parse_qs
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 UI_DIR = Path(__file__).resolve().parent
@@ -74,6 +75,9 @@ class Handler(BaseHTTPRequestHandler):
         length = int(self.headers.get("Content-Length", 0))
         raw = self.rfile.read(length)
         return json.loads(raw.decode("utf-8"))
+
+    def _query_params(self):
+        return parse_qs(urlparse(self.path).query)
 
     # ---- GET ----
 
@@ -186,7 +190,12 @@ class Handler(BaseHTTPRequestHandler):
             self._send_json(200, _google_unavailable_error())
             return
         try:
-            self._send_json(200, {"candidates": scan(days=30)})
+            days_param = self._query_params().get("days", ["30"])[0]
+            days = max(1, min(int(days_param), 365))
+        except (ValueError, IndexError):
+            days = 30
+        try:
+            self._send_json(200, {"candidates": scan(days=days), "days": days})
         except Exception as e:
             self._send_json(200, {"error": str(e)})
 
