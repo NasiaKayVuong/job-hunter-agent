@@ -112,8 +112,15 @@
 
       <section>
         <h2>Location</h2>
-        <label class="checkbox"><input type="checkbox" id="remote" /> Open to remote</label>
-        <label>Hybrid/onsite area(s)
+        <label>Work arrangement
+          <select id="location_type">
+            <option value="any">Open to any (remote, hybrid, or onsite)</option>
+            <option value="remote_only">Remote only</option>
+            <option value="hybrid_only">Hybrid only</option>
+            <option value="onsite_only">Onsite only</option>
+          </select>
+        </label>
+        <label>Hybrid/onsite area(s) <span class="hint">(ignored if "Remote only" is selected above)</span>
           <input type="text" id="hybrid_areas" placeholder="e.g. Chicago, IL" />
         </label>
         <label class="checkbox"><input type="checkbox" id="relocation" /> Open to relocation</label>

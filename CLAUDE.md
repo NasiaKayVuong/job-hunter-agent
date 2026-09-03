@@ -55,6 +55,12 @@ once" override — if the user wants something submitted, they click it.
    and the explicit preference fields (location, comp floor, industries excluded,
    employment type, dealbreakers). Drop anything that fails an explicit
    dealbreaker or excluded industry outright.
+   - **Work arrangement.** `locations.type` is a hard filter, same weight as
+     an excluded industry: `"remote_only"` drops anything hybrid or onsite,
+     `"hybrid_only"` drops fully remote and fully onsite, `"onsite_only"`
+     drops remote and hybrid, `"any"` (the default) applies no filter here.
+     `hybrid_or_onsite_areas` still narrows which hybrid/onsite locations
+     count as a match; it's ignored when `type` is `"remote_only"`.
    - **Companies excluded.** Drop any listing from a company in
      `preferences.json`'s `companies_excluded` outright, same as an excluded
      industry — a name match (case-insensitive substring is fine), no need to

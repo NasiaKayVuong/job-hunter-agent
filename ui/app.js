@@ -85,6 +85,18 @@ function splitLines(value) {
     .filter(Boolean);
 }
 
+// Preferences saved before the explicit "Work arrangement" selector only had
+// a `remote` boolean + a free-text hybrid/onsite areas list — derive the
+// closest new `type` value from that so old preferences.json files still
+// load sensibly instead of silently resetting to "any".
+function deriveLegacyLocationType(loc) {
+  const hasAreas = (loc.hybrid_or_onsite_areas || []).length > 0;
+  if (loc.remote && hasAreas) return "any";
+  if (loc.remote) return "remote_only";
+  if (hasAreas) return "hybrid_only";
+  return "any";
+}
+
 function fillForm(prefs) {
   if (!prefs) return;
   $("target_titles").value = (prefs.target_titles || []).join(", ");
@@ -93,7 +105,7 @@ function fillForm(prefs) {
     $("experience_years_tolerance").value = prefs.experience_years_tolerance;
   }
   const loc = prefs.locations || {};
-  $("remote").checked = !!loc.remote;
+  $("location_type").value = loc.type || deriveLegacyLocationType(loc);
   $("hybrid_areas").value = (loc.hybrid_or_onsite_areas || []).join(", ");
   $("relocation").checked = !!loc.open_to_relocation;
   $("work_authorization").value = prefs.work_authorization || "";
@@ -150,7 +162,7 @@ function buildPreferences() {
       ? Number($("experience_years_tolerance").value)
       : 3,
     locations: {
-      remote: $("remote").checked,
+      type: $("location_type").value,
       hybrid_or_onsite_areas: splitList($("hybrid_areas").value),
       open_to_relocation: $("relocation").checked,
     },

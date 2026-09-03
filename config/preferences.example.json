@@ -3,7 +3,7 @@
   "seniority": "match my resume",
   "experience_years_tolerance": 3,
   "locations": {
-    "remote": true,
+    "type": "any",
     "hybrid_or_onsite_areas": ["Austin, TX"],
     "open_to_relocation": true
   },
