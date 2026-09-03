@@ -216,35 +216,68 @@ $("setup-form").addEventListener("submit", async (e) => {
 
 // ---------- Tabs ----------
 
+function switchTab(tabName) {
+  const btn = document.querySelector(`.tab-btn[data-tab="${tabName}"]`);
+  if (!btn) return;
+  document.querySelectorAll(".tab-btn").forEach((b) => b.classList.remove("active"));
+  document.querySelectorAll(".tab-panel").forEach((p) => (p.hidden = true));
+  btn.classList.add("active");
+  $("panel-" + tabName).hidden = false;
+  if (tabName === "getting-started") loadGettingStarted();
+  if (tabName === "connections") loadGoogleStatus();
+  if (tabName === "listings") loadListings();
+  if (tabName === "applications") loadApplications();
+  if (tabName === "calendar") loadCalendar();
+}
+
 document.querySelectorAll(".tab-btn").forEach((btn) => {
-  btn.addEventListener("click", () => {
-    document.querySelectorAll(".tab-btn").forEach((b) => b.classList.remove("active"));
-    document.querySelectorAll(".tab-panel").forEach((p) => (p.hidden = true));
-    btn.classList.add("active");
-    $("panel-" + btn.dataset.tab).hidden = false;
-    if (btn.dataset.tab === "connections") loadGoogleStatus();
-    if (btn.dataset.tab === "listings") loadListings();
-    if (btn.dataset.tab === "applications") loadApplications();
-    if (btn.dataset.tab === "calendar") loadCalendar();
-  });
+  btn.addEventListener("click", () => switchTab(btn.dataset.tab));
 });
+
+document.querySelectorAll(".gs-jump").forEach((btn) => {
+  btn.addEventListener("click", () => switchTab(btn.dataset.tab));
+});
+
+// A guide window (opened by app.py) may load with ?tab=connections etc.
+// to land directly on the right tab instead of Get Started.
+(function initialTabFromQuery() {
+  const params = new URLSearchParams(window.location.search);
+  const requested = params.get("tab");
+  if (requested && document.querySelector(`.tab-btn[data-tab="${requested}"]`)) {
+    switchTab(requested);
+  } else {
+    loadGettingStarted();
+  }
+})();
 
 // ---------- Connections ----------
 
+async function fetchGoogleStatus() {
+  const res = await fetch("/api/google/status");
+  return res.json();
+}
+
 async function loadGoogleStatus() {
+  const secretEl = $("client-secret-status");
   const el = $("google-status");
   const btn = $("google-connect-btn");
+  secretEl.textContent = "Checking…";
   el.textContent = "Checking…";
   try {
-    const res = await fetch("/api/google/status");
-    const data = await res.json();
+    const data = await fetchGoogleStatus();
     if (!data.installed) {
-      el.textContent = "Not installed. Run: pip install -r requirements.txt";
+      secretEl.textContent = "Google packages not installed. Run: pip install -r requirements.txt";
+      el.textContent = "—";
       btn.disabled = true;
-    } else if (!data.client_secret_present) {
-      el.textContent = "No OAuth client set up yet. See README.md → Calendar and tracking.";
+      return;
+    }
+    secretEl.textContent = data.client_secret_present
+      ? "✓ Client secret on file"
+      : "Not uploaded yet — see steps above.";
+    if (!data.client_secret_present) {
+      el.textContent = "Upload a client secret first (step 1 above).";
       btn.textContent = "Connect Google account";
-      btn.disabled = false;
+      btn.disabled = true;
     } else if (data.connected) {
       el.textContent = "✓ Connected";
       btn.textContent = "Reconnect";
@@ -275,6 +308,72 @@ $("google-connect-btn").addEventListener("click", async () => {
     await loadGoogleStatus();
   }
 });
+
+$("upload-client-secret-btn").addEventListener("click", async () => {
+  const fileInput = $("client-secret-file");
+  const btn = $("upload-client-secret-btn");
+  if (!fileInput.files || !fileInput.files[0]) {
+    showStatus("Choose a client_secret.json file first.", "err");
+    return;
+  }
+  btn.disabled = true;
+  try {
+    const dataUrl = await readFileAsDataURL(fileInput.files[0]);
+    const res = await fetch("/api/google/client-secret", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ data_base64: dataUrl.split(",")[1] }),
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    showStatus("Client secret saved.", "ok");
+    fileInput.value = "";
+    await loadGoogleStatus();
+  } catch (e) {
+    showStatus("Upload failed: " + e.message, "err");
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+// ---------- Get Started ----------
+
+function setChecklistItem(id, ok, detail) {
+  const li = $(id);
+  const mark = li.querySelector(".checklist-mark");
+  const detailEl = li.querySelector(".checklist-detail");
+  mark.textContent = ok ? "✓" : "○";
+  mark.className = "checklist-mark " + (ok ? "ok-text" : "");
+  detailEl.textContent = detail || "";
+  return ok;
+}
+
+async function loadGettingStarted() {
+  $("gs-summary").textContent = "Checking…";
+  try {
+    const [prefsRes, googleData] = await Promise.all([
+      fetch("/api/preferences").then((r) => r.json()),
+      fetchGoogleStatus().catch(() => ({ installed: false, client_secret_present: false, connected: false })),
+    ]);
+
+    const hasResume = !!prefsRes.resume_filename;
+    const prefs = prefsRes.preferences;
+    const hasPrefs = !!(prefs && prefs.target_titles && prefs.target_titles.length);
+
+    let done = 0;
+    if (setChecklistItem("gs-resume", hasResume, hasResume ? prefsRes.resume_filename : "No resume on file yet.")) done++;
+    if (setChecklistItem("gs-preferences", hasPrefs, hasPrefs ? "Target: " + prefs.target_titles.join(", ") : "Not filled in yet.")) done++;
+    if (setChecklistItem("gs-client-secret", !!googleData.client_secret_present, googleData.client_secret_present ? "Uploaded." : "Optional — needed for Calendar/Gmail/Sheets/Drive features.")) done++;
+    if (setChecklistItem("gs-connected", !!googleData.connected, googleData.connected ? "Connected." : "Not connected yet.")) done++;
+
+    const required = hasResume && hasPrefs;
+    $("gs-summary").textContent = required
+      ? "✓ Core setup complete — you're ready to search for jobs through Claude. Google features are optional."
+      : `${done} of 4 steps complete.`;
+  } catch (e) {
+    $("gs-summary").textContent = "Couldn't check status: " + e.message;
+  }
+}
 
 // ---------- Applications ----------
 

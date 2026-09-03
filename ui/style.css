@@ -298,3 +298,56 @@ th {
   font-size: 0.72rem;
   letter-spacing: 0.03em;
 }
+
+.checklist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.checklist li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.checklist-mark {
+  flex-shrink: 0;
+  width: 1.4rem;
+  height: 1.4rem;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.checklist-mark.ok-text {
+  border-color: var(--ok-fg);
+  color: var(--ok-fg);
+}
+
+.checklist-body {
+  font-size: 0.88rem;
+  display: block;
+}
+
+.checklist-detail {
+  display: block;
+  color: var(--muted);
+  font-size: 0.82rem;
+  margin: 0.15rem 0 0.4rem;
+}
+
+.gs-jump {
+  margin: 0;
+}

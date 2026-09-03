@@ -98,13 +98,22 @@ cd job-hunter-agent
 python app.py
 ```
 
-This opens the dashboard in its own window (via `pywebview`). The Setup tab
-needs no extra packages; the Connections/Applications/Calendar tabs and the
-underlying Google features need a few — `pip install -r requirements.txt`
-covers all of it, including `pywebview` itself. If you'd rather skip the
-desktop window and just use a browser tab, `python ui/server.py` and open
-`http://localhost:8787` works the same way with zero extra packages needed
-for the Setup tab.
+This opens the dashboard in its own window (via `pywebview`), landing on a
+**Get Started** tab with a checklist of the four things a fresh setup needs
+(resume, preferences, Google OAuth client, Google connected) — each item
+links straight to where you fix it, and it updates live as you go. Google is
+optional; the checklist marks it clearly so it's obvious you can skip it. The
+Setup tab itself needs no extra packages; the Connections/Applications/
+Calendar tabs and the underlying Google features need a few — `pip install
+-r requirements.txt` covers all of it, including `pywebview` itself. If you'd
+rather skip the desktop window and just use a browser tab, `python
+ui/server.py` and open `http://localhost:8787` works the same way with zero
+extra packages needed for the Setup tab.
+
+If Google isn't fully connected yet, a second, smaller window also opens
+alongside the main one, pointed straight at the Connections tab, so a
+first-time user isn't left hunting for it — close it any time, it won't
+reappear once Google is connected.
 
 In the Setup tab: upload your resume (PDF or DOCX) — or use "Import from
 Drive instead" once Google is connected — and fill in your preferences:
@@ -156,7 +165,10 @@ so this repo needs its own.
    project — a second, dedicated client is slightly cleaner since it keeps
    this tool's consent grant separate from anything else using that project,
    but either works). Download the JSON.
-3. Save it as `data/google/client_secret.json` (gitignored — never commit it).
+3. Upload that JSON file in the desktop app's Connections tab ("1. Google
+   OAuth client"), or save it yourself as `data/google/client_secret.json`
+   (gitignored — never commit it) — either way works, the upload button
+   just saves you finding the file path.
 4. `pip install -r requirements.txt`
 5. `python auth/google_auth.py` (or click "Connect Google account" in the
    desktop app's Connections tab) — opens a browser for you to authorize.

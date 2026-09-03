@@ -33,7 +33,9 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 CONFIG_DIR = REPO_ROOT / "config"
 RESUME_DIR = REPO_ROOT / "data" / "resume"
+GOOGLE_DIR = REPO_ROOT / "data" / "google"
 PREFS_PATH = CONFIG_DIR / "preferences.json"
+CLIENT_SECRET_PATH = GOOGLE_DIR / "client_secret.json"
 
 PORT = 8787
 
@@ -208,6 +210,9 @@ class Handler(BaseHTTPRequestHandler):
         if self.path == "/api/google/connect":
             self._post_google_connect()
             return
+        if self.path == "/api/google/client-secret":
+            self._post_google_client_secret()
+            return
         if self.path == "/api/drive/import-resume":
             self._post_drive_import_resume()
             return
@@ -256,6 +261,40 @@ class Handler(BaseHTTPRequestHandler):
             self._send_json(200, {"ok": True})
         except Exception as e:
             self._send_json(200, {"error": str(e)})
+
+    def _post_google_client_secret(self):
+        try:
+            payload = self._read_json_body()
+        except (json.JSONDecodeError, UnicodeDecodeError):
+            self._send_json(400, {"error": "Invalid JSON body"})
+            return
+
+        data_b64 = payload.get("data_base64")
+        if not data_b64:
+            self._send_json(400, {"error": "Missing data_base64"})
+            return
+
+        try:
+            raw = base64.b64decode(data_b64)
+            parsed = json.loads(raw.decode("utf-8"))
+        except Exception:
+            self._send_json(400, {"error": "That file isn't valid JSON."})
+            return
+
+        # Sanity-check this actually looks like a Google OAuth "Desktop app"
+        # client secret, not some other file the user picked by mistake.
+        block = parsed.get("installed") or parsed.get("web")
+        if not block or "client_id" not in block or "client_secret" not in block:
+            self._send_json(400, {
+                "error": "That doesn't look like a Google OAuth client JSON "
+                "(expected an \"installed\" section with client_id/client_secret). "
+                "Make sure you downloaded a Desktop app OAuth client from Google Cloud Console."
+            })
+            return
+
+        GOOGLE_DIR.mkdir(parents=True, exist_ok=True)
+        CLIENT_SECRET_PATH.write_bytes(raw)
+        self._send_json(200, {"ok": True})
 
     def _post_drive_import_resume(self):
         try:

@@ -211,6 +211,19 @@ once" override — if the user wants something submitted, they click it.
   draft anything, or autofill an application — anything requiring judgment
   or writing on the user's behalf stays exclusively Claude's job. Don't add
   functionality to `app.py`/`ui/` that crosses that line.
+- First-run guidance is the same kind of self-service, no-judgment UI: the
+  Get Started tab (default view) is a live checklist reading existing state
+  (resume/preferences/`data/google/client_secret.json`/connection status) —
+  it doesn't decide anything, just reflects it. `POST /api/google/client-secret`
+  lets the user upload their downloaded OAuth JSON through the UI instead of
+  placing it on disk by hand, with a basic shape check (`installed`/`web`
+  block with `client_id`/`client_secret`) before saving — still just moving
+  a file the user chose, no different in kind from the resume upload.
+  `app.py` opens a second, smaller window pointed at `?tab=connections` on
+  launch only when Google isn't fully connected yet (checked via
+  `auth.google_auth.connection_status()`); it closes like any other window
+  and never reopens once setup is complete. None of this searches, drafts,
+  or acts on the user's behalf — same boundary as above.
 
 ## Boundaries
 

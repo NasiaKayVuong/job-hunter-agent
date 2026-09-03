@@ -15,7 +15,8 @@
 
   <nav class="tabs" id="tabs">
     <div class="tab-list">
-      <button class="tab-btn active" data-tab="setup" type="button">Setup</button>
+      <button class="tab-btn active" data-tab="getting-started" type="button">Get Started</button>
+      <button class="tab-btn" data-tab="setup" type="button">Setup</button>
       <button class="tab-btn" data-tab="connections" type="button">Connections</button>
       <button class="tab-btn" data-tab="listings" type="button">Listings</button>
       <button class="tab-btn" data-tab="applications" type="button">Applications</button>
@@ -29,8 +30,59 @@
 
   <div id="status" class="status" hidden></div>
 
+  <!-- ===== Get Started ===== -->
+  <section class="tab-panel" id="panel-getting-started">
+    <section>
+      <h2>Setup checklist</h2>
+      <p id="gs-summary" class="status-line">Checking…</p>
+      <ol class="checklist" id="gs-checklist">
+        <li id="gs-resume">
+          <span class="checklist-mark">?</span>
+          <span class="checklist-body">
+            <strong>Resume</strong> — needed so Claude can match roles and tailor applications.
+            <span class="checklist-detail"></span>
+            <button type="button" class="secondary gs-jump" data-tab="setup">Go to Setup →</button>
+          </span>
+        </li>
+        <li id="gs-preferences">
+          <span class="checklist-mark">?</span>
+          <span class="checklist-body">
+            <strong>Preferences</strong> — target role, location, comp floor, and what to exclude.
+            <span class="checklist-detail"></span>
+            <button type="button" class="secondary gs-jump" data-tab="setup">Go to Setup →</button>
+          </span>
+        </li>
+        <li id="gs-client-secret">
+          <span class="checklist-mark">?</span>
+          <span class="checklist-body">
+            <strong>Google OAuth client</strong> — optional, only needed for Calendar/Gmail/Sheets/Drive features (tracker, interview scheduling, email status checks).
+            <span class="checklist-detail"></span>
+            <button type="button" class="secondary gs-jump" data-tab="connections">Go to Connections →</button>
+          </span>
+        </li>
+        <li id="gs-connected">
+          <span class="checklist-mark">?</span>
+          <span class="checklist-body">
+            <strong>Google connection</strong>
+            <span class="checklist-detail"></span>
+            <button type="button" class="secondary gs-jump" data-tab="connections">Go to Connections →</button>
+          </span>
+        </li>
+      </ol>
+    </section>
+
+    <section>
+      <h2>Also worth having</h2>
+      <p class="hint">Not tracked above since this app can't check them itself — but you'll want both for the actual search/apply workflow, which happens through Claude, not this window.</p>
+      <ul class="picker-list">
+        <li><strong>Claude Code</strong>, opened on this same folder. Once your resume/preferences are set, ask it to find jobs, or run <code>/find-jobs</code>. Run <code>/start</code> at the beginning of a session to pick up where you left off.</li>
+        <li><strong><a href="https://claude.com/chrome" target="_blank" rel="noopener">claude-in-chrome</a></strong> browser extension, connected — needed for the autofill step when applying to a job. Search and drafting work without it.</li>
+      </ul>
+    </section>
+  </section>
+
   <!-- ===== Setup ===== -->
-  <section class="tab-panel" id="panel-setup">
+  <section class="tab-panel" id="panel-setup" hidden>
     <form id="setup-form">
       <section>
         <h2>Resume</h2>
@@ -142,8 +194,21 @@
   <!-- ===== Connections ===== -->
   <section class="tab-panel" id="panel-connections" hidden>
     <section>
-      <h2>Google account</h2>
-      <p class="hint">One connection covers Calendar, Gmail (read-only), Sheets, and Drive. Used for tracking interviews and application status — see <code>CLAUDE.md</code> for exactly what is and isn't allowed with it (no sending email, no calendar invites, no editing files it didn't create).</p>
+      <h2>1. Google OAuth client</h2>
+      <p class="hint">Before connecting, this app needs an OAuth client from your own Google Cloud project — a small JSON file you download once. This part can't be automated from in here (there's no bootstrap credential to call Google's own APIs with), but uploading the resulting file can be.</p>
+      <ol class="hint" style="padding-left: 1.1rem; margin: 0 0 0.8rem;">
+        <li>In the <a href="https://console.cloud.google.com/" target="_blank" rel="noopener">Google Cloud Console</a>, create a project (or reuse one you already have) and enable the Calendar, Gmail, Sheets, and Drive APIs.</li>
+        <li>Under "APIs &amp; Services → Credentials", create an OAuth client ID of type <strong>Desktop app</strong>, and download its JSON.</li>
+        <li>Upload that JSON file below.</li>
+      </ol>
+      <p id="client-secret-status" class="status-line">Checking…</p>
+      <input type="file" id="client-secret-file" accept=".json" />
+      <button type="button" id="upload-client-secret-btn" class="secondary">Upload client secret</button>
+    </section>
+
+    <section>
+      <h2>2. Connect your account</h2>
+      <p class="hint">One connection covers Calendar, Gmail (read-only search + draft creation, never send), Sheets, and Drive. See <code>CLAUDE.md</code> for exactly what is and isn't allowed with it (no sending email, no calendar invites, no editing files it didn't create).</p>
       <p id="google-status" class="status-line">Checking…</p>
       <button type="button" id="google-connect-btn">Connect Google account</button>
     </section>
