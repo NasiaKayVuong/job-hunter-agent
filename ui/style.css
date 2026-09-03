@@ -11,6 +11,7 @@
   --ok-fg: #1e6b34;
   --err-bg: #fbe9e7;
   --err-fg: #a3312a;
+  --link: #3d5a80;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -26,6 +27,7 @@
     --ok-fg: #7ad39a;
     --err-bg: #3a1a17;
     --err-fg: #f0a29c;
+    --link: #9dc3ee;
   }
 }
 
@@ -42,6 +44,7 @@
   --ok-fg: #7ad39a;
   --err-bg: #3a1a17;
   --err-fg: #f0a29c;
+  --link: #9dc3ee;
 }
 
 * { box-sizing: border-box; }
@@ -263,8 +266,12 @@ button:disabled { opacity: 0.55; cursor: default; }
 }
 
 .picker-list li a {
-  color: var(--accent);
+  color: var(--link);
   font-size: 0.8rem;
+}
+
+table a {
+  color: var(--link);
 }
 
 .table-wrap {
