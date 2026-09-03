@@ -250,6 +250,13 @@ document.querySelectorAll(".gs-jump").forEach((btn) => {
   } else {
     loadGettingStarted();
   }
+  // Pre-load tracked Applications and Listings in the background on startup
+  // (not just when the user clicks over) so both tabs are already populated
+  // the moment they're opened, instead of showing a loading state each time.
+  // Harmless if Google isn't connected yet — loadApplications/loadListings
+  // already handle that error quietly into their own (currently hidden) panel.
+  if (requested !== "listings") loadListings();
+  if (requested !== "applications") loadApplications();
 })();
 
 // ---------- Connections ----------
