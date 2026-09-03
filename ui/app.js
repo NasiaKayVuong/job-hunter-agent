@@ -607,12 +607,17 @@ async function loadListings() {
     }
     for (const r of rows) {
       const tr = document.createElement("tr");
-      const cells = [r.date_found, r.company, r.title, r.location, r.job_type, r.comp_range, r.source, r.match_notes];
+      const cells = [r.date_found, r.company, r.title, r.location, r.job_type, r.comp_range, r.source];
       for (const c of cells) {
         const td = document.createElement("td");
         td.textContent = c || "";
         tr.appendChild(td);
       }
+      const notesTd = document.createElement("td");
+      notesTd.className = "notes-cell";
+      notesTd.textContent = r.match_notes || "";
+      if (r.match_notes) notesTd.title = r.match_notes;
+      tr.appendChild(notesTd);
       const statusTd = document.createElement("td");
       statusTd.appendChild(listingStatusSelect(r.row, r.status));
       tr.appendChild(statusTd);

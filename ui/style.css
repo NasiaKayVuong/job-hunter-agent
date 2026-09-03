@@ -299,6 +299,17 @@ th {
   letter-spacing: 0.03em;
 }
 
+.notes-cell {
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: default;
+}
+
+.app.wide .notes-cell {
+  max-width: 420px;
+}
+
 .checklist {
   list-style: none;
   margin: 0;
