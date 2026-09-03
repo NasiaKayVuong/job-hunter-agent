@@ -17,6 +17,7 @@
   "employment_type": ["full_time"],
   "industries_excluded": ["tobacco", "gambling"],
   "industries_preferred": ["climate", "education"],
+  "companies_excluded": [],
   "dealbreakers": [
     "no unpaid overtime expectations",
     "no contract or C2C arrangements"

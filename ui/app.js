@@ -106,6 +106,7 @@ function fillForm(prefs) {
   $("et_part_time").checked = et.includes("part_time");
   $("industries_excluded").value = (prefs.industries_excluded || []).join(", ");
   $("industries_preferred").value = (prefs.industries_preferred || []).join(", ");
+  $("companies_excluded").value = (prefs.companies_excluded || []).join(", ");
   $("dealbreakers").value = (prefs.dealbreakers || []).join("\n");
   const src = prefs.sources || {};
   $("src_boards").checked = src.job_boards !== false;
@@ -167,6 +168,7 @@ function buildPreferences() {
     ].filter(Boolean),
     industries_excluded: splitList($("industries_excluded").value),
     industries_preferred: splitList($("industries_preferred").value),
+    companies_excluded: splitList($("companies_excluded").value),
     dealbreakers: splitLines($("dealbreakers").value),
     sources: {
       job_boards: $("src_boards").checked,

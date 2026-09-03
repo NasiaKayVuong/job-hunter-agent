@@ -55,6 +55,11 @@ once" override — if the user wants something submitted, they click it.
    and the explicit preference fields (location, comp floor, industries excluded,
    employment type, dealbreakers). Drop anything that fails an explicit
    dealbreaker or excluded industry outright.
+   - **Companies excluded.** Drop any listing from a company in
+     `preferences.json`'s `companies_excluded` outright, same as an excluded
+     industry — a name match (case-insensitive substring is fine), no need to
+     ask why. This is a harder filter than a dealbreaker: don't surface these
+     even to explain the match is bad, just skip them silently.
    - **Years-of-experience check.** Compute the user's actual total years of
      professional experience from the resume's employment history (sum/span
      of relevant roles — use judgment on overlaps, don't just count job
