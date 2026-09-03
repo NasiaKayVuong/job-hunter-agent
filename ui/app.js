@@ -252,23 +252,53 @@ document.querySelectorAll(".gs-jump").forEach((btn) => {
   btn.addEventListener("click", () => switchTab(btn.dataset.tab));
 });
 
-// A guide window (opened by app.py) may load with ?tab=connections etc.
-// to land directly on the right tab instead of Get Started.
-(function initialTabFromQuery() {
+// True once every Get Started checklist item is done, Google included —
+// a lighter "core setup" bar exists on the Get Started tab itself (Google is
+// optional there), but landing straight on Listings only makes sense once
+// Listings will actually have something to show.
+async function isFullyConfigured() {
+  try {
+    const [prefsRes, googleData] = await Promise.all([
+      fetch("/api/preferences").then((r) => r.json()),
+      fetchGoogleStatus().catch(() => ({ client_secret_present: false, connected: false })),
+    ]);
+    const hasResume = !!prefsRes.resume_filename;
+    const prefs = prefsRes.preferences;
+    const hasPrefs = !!(prefs && prefs.target_titles && prefs.target_titles.length);
+    return hasResume && hasPrefs && !!googleData.client_secret_present && !!googleData.connected;
+  } catch (e) {
+    return false;
+  }
+}
+
+// A guide window (opened by app.py) may load with ?tab=connections etc. to
+// land directly on the right tab. Otherwise, once setup and Google are both
+// fully done, skip Get Started (nothing left to do there) and land on
+// Listings instead — the tab someone who's already set up actually wants.
+(async function initialTab() {
   const params = new URLSearchParams(window.location.search);
-  const requested = params.get("tab");
-  if (requested && document.querySelector(`.tab-btn[data-tab="${requested}"]`)) {
-    switchTab(requested);
+  const requestedFromQuery = params.get("tab");
+  let landedTab;
+
+  if (requestedFromQuery && document.querySelector(`.tab-btn[data-tab="${requestedFromQuery}"]`)) {
+    switchTab(requestedFromQuery);
+    landedTab = requestedFromQuery;
+  } else if (await isFullyConfigured()) {
+    switchTab("listings");
+    landedTab = "listings";
   } else {
     loadGettingStarted();
+    landedTab = "getting-started";
   }
-  // Pre-load tracked Applications and Listings in the background on startup
-  // (not just when the user clicks over) so both tabs are already populated
-  // the moment they're opened, instead of showing a loading state each time.
-  // Harmless if Google isn't connected yet — loadApplications/loadListings
-  // already handle that error quietly into their own (currently hidden) panel.
-  if (requested !== "listings") loadListings();
-  if (requested !== "applications") loadApplications();
+
+  // Pre-load the other startup-relevant tabs in the background (not just
+  // when the user clicks over) so they're already populated the moment
+  // they're opened, instead of showing a loading state each time. Harmless
+  // if Google isn't connected yet — each loader handles that error quietly
+  // into its own (currently hidden) panel.
+  if (landedTab !== "listings") loadListings();
+  if (landedTab !== "applications") loadApplications();
+  if (landedTab !== "getting-started") loadGettingStarted();
 })();
 
 // ---------- Connections ----------
