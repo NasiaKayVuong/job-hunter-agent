@@ -1,4 +1,4 @@
-"""Shared Google OAuth helper for Calendar, Gmail (read-only), Sheets, and Drive.
+"""Shared Google OAuth helper for Calendar, Gmail (read + draft-only), Sheets, and Drive.
 
 One installed-app OAuth client, one token, one scope set. Run this file
 directly the first time to do the interactive browser consent; after that,
@@ -25,14 +25,15 @@ GOOGLE_DIR = REPO_ROOT / "data" / "google"
 CLIENT_SECRET_PATH = GOOGLE_DIR / "client_secret.json"
 TOKEN_PATH = GOOGLE_DIR / "token.json"
 
-# Deliberately minimal and read-mostly. In particular: no gmail.send /
-# gmail.compose scope exists here — this tool can search and read email to
-# detect application status updates, never send anything through Gmail. Drive
-# access is read-only for browsing/importing plus "create files this app
-# creates" for saving drafts — never broad read/write over the whole Drive.
+# Deliberately minimal. gmail.compose allows creating/editing DRAFTS only --
+# it does NOT allow sending on its own, and there is no send-capable code
+# path anywhere in this repo (see tools/gmail_draft.py's own docstring).
+# Drive access is read-only for browsing/importing plus "create files this
+# app creates" for saving drafts — never broad read/write over the whole Drive.
 SCOPES = [
     "https://www.googleapis.com/auth/calendar",
     "https://www.googleapis.com/auth/gmail.readonly",
+    "https://www.googleapis.com/auth/gmail.compose",
     "https://www.googleapis.com/auth/spreadsheets",
     "https://www.googleapis.com/auth/drive.readonly",
     "https://www.googleapis.com/auth/drive.file",
@@ -79,4 +80,4 @@ def get_credentials():
 if __name__ == "__main__":
     get_credentials()
     print(f"Authorized. Token saved to {TOKEN_PATH}.")
-    print("Scopes granted: calendar, gmail.readonly, spreadsheets, drive.readonly, drive.file.")
+    print("Scopes granted: calendar, gmail.readonly, gmail.compose, spreadsheets, drive.readonly, drive.file.")

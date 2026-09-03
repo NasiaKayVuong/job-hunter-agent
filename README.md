@@ -162,10 +162,16 @@ so this repo needs its own.
    desktop app's Connections tab) — opens a browser for you to authorize.
    Sign in with whichever Google account you want this tool to use — that
    choice is independent of which project/client issued the request. This
-   grants: Calendar (read/write your own calendar), Gmail (**read-only**
-   search), Sheets (read/write), and Drive (read-only browsing + create-only
-   for saving drafts). There is no send-email or invite-someone capability
-   anywhere in this repo's code — see `CLAUDE.md`.
+   grants: Calendar (read/write your own calendar), Gmail (read-only search
+   **plus draft creation** — `gmail.compose`, not `gmail.send`), Sheets
+   (read/write), and Drive (read-only browsing + create-only for saving
+   drafts). There is no send-email or invite-someone capability anywhere in
+   this repo's code — creating a Gmail draft is as far as it goes, you
+   always send it yourself — see `CLAUDE.md`.
+   - If you connected before this feature existed, you'll need to run this
+     step again (or click "Reconnect" in the Connections tab) — the scope
+     changed, and your existing token doesn't have draft-creation access
+     until you re-authorize.
 
 **Using it**, once set up:
 
@@ -242,6 +248,7 @@ tools/gcal.py                create/list calendar events (no attendees, ever)
 tools/tracker.py             read/write the application tracker (Google Sheet)
 tools/listings.py            read/write candidate listings (2nd tab, same Sheet)
 tools/gmail_scan.py          read-only email scan for status updates
+tools/gmail_draft.py         create Gmail drafts with attachments (no send capability, ever)
 tools/drive.py               import a resume from Drive; save drafts (create-only);
                               creates/finds the Job Tracker / Resumes / Cover Letters folders
 applications/                drafted materials + a log of what was searched/applied to (gitignored)

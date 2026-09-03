@@ -170,6 +170,25 @@ once" override — if the user wants something submitted, they click it.
     provenance apart from a board/company-site find.
   - Still show it to the user as part of the same shortlist-style summary —
     don't silently add rows without saying so.
+- **Replying to a recruiter by email (not a web form).** Some opportunities
+  — Plato is the example that motivated this — only have an email/direct-
+  reply flow, no ATS application page to autofill. For these:
+  - Draft the reply body as a normal file (e.g.
+    `applications/<company>-<role-slug>/email-reply.txt`), grounded in the
+    resume, same honesty rules as any cover letter — state real gaps rather
+    than glossing over them.
+  - Create it as an actual Gmail draft with `python tools/gmail_draft.py
+    create --to ... --subject ... --body-file ... --attach
+    data/resume/<filename>` (or a tailored resume file, using its real
+    filename, same rule as `--resume-version` in the tracker). Attach the
+    resume so the draft is actually ready to send, not half-finished.
+  - **This creates a draft only — never a sent email.** `gmail_draft.py` has
+    no send function anywhere in it, by design. Tell the user the draft is
+    ready in Gmail for them to review and send themselves; don't imply it
+    went out.
+  - If a draft already exists for this exact recruiter thread (check by
+    reading the thread first), edit/replace that context for the user
+    rather than creating a confusing duplicate — mention what you found.
 - **Using the tracker for better search.** Before ranking a new shortlist, you
   can read the full tracker with `python tools/tracker.py list` and look for
   patterns — which titles, sources, locations, or resume/cover-letter versions
@@ -213,11 +232,15 @@ once" override — if the user wants something submitted, they click it.
 - Never add calendar attendees or otherwise send a calendar invite — not
   possible through `tools/gcal.py` by design, and don't work around that
   by calling the Calendar API some other way.
-- Gmail access is read-only search (`tools/gmail_scan.py`). Never attempt to
-  send, reply to, or modify email — there is no code path for it here, and it
-  should stay that way.
-- Don't run `tools/gmail_scan.py` or touch the tracker without being asked in
-  that session — no proactive/background scanning.
+- Gmail access is read-only search (`tools/gmail_scan.py`) plus draft-only
+  creation (`tools/gmail_draft.py`, `gmail.compose` scope). **Never attempt
+  to send an email, reply directly, or modify anything other than creating
+  a draft** — there is no send-capable code path anywhere in this repo, and
+  it should stay that way. Creating a draft is not the same as sending one;
+  always be explicit with the user about which one happened.
+- Don't run `tools/gmail_scan.py`, `tools/gmail_draft.py`, or touch the
+  tracker without being asked in that session — no proactive/background
+  scanning or drafting.
 - `tools/drive.py` is create-only and read-only — there is no update/
   overwrite/delete function for Drive files anywhere in this repo. Never edit
   or delete a file in the user's Drive that this tool didn't itself create.
