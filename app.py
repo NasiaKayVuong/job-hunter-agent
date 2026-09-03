@@ -17,8 +17,12 @@ Falls back to printing a browser URL if pywebview isn't installed.
 
 import sys
 import threading
+from pathlib import Path
 
 from ui.server import PORT, create_server
+
+REPO_ROOT = Path(__file__).resolve().parent
+WEBVIEW_STORAGE = REPO_ROOT / "data" / "webview_storage"
 
 
 def _google_setup_incomplete():
@@ -69,7 +73,11 @@ def main():
             min_size=(420, 480),
         )
 
-    webview.start()
+    # pywebview defaults to private_mode=True, which wipes localStorage (and
+    # thus the dark-mode/wide-view toggles) on every restart. Give it a real,
+    # persistent profile inside the repo's own data/ dir instead.
+    WEBVIEW_STORAGE.mkdir(parents=True, exist_ok=True)
+    webview.start(private_mode=False, storage_path=str(WEBVIEW_STORAGE))
     server.shutdown()
 
 

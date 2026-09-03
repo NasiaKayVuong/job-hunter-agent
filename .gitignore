@@ -5,6 +5,7 @@ data/resume/*
 !data/resume/.gitkeep
 data/google/*
 !data/google/.gitkeep
+data/webview_storage/
 applications/*
 !applications/README.md
 state/session-log.md
