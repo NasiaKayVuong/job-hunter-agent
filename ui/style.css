@@ -351,3 +351,50 @@ th {
 .gs-jump {
   margin: 0;
 }
+
+.steps {
+  list-style: none;
+  counter-reset: step;
+  margin: 0.7rem 0 0.9rem;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.steps li {
+  position: relative;
+  padding: 0.55rem 0.6rem 0.55rem 2.3rem;
+  font-size: 0.88rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.steps li::before {
+  counter-increment: step;
+  content: counter(step);
+  position: absolute;
+  left: 0.55rem;
+  top: 0.55rem;
+  width: 1.3rem;
+  height: 1.3rem;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--accent-fg);
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1.3rem;
+  text-align: center;
+}
+
+.callout {
+  padding: 0.6rem 0.8rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  margin: 0 0 0.8rem;
+}
+
+.callout-warn {
+  background: var(--err-bg);
+  color: var(--err-fg);
+}
