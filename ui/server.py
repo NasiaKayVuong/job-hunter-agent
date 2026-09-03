@@ -84,29 +84,34 @@ class Handler(BaseHTTPRequestHandler):
     # ---- GET ----
 
     def do_GET(self):
-        if self.path == "/api/preferences":
+        # self.path includes any query string (e.g. "/?tab=connections" from
+        # the OAuth guide window) — strip it before matching routes, static
+        # or otherwise, so a query string doesn't turn "/" into a 404.
+        path = urlparse(self.path).path
+
+        if path == "/api/preferences":
             self._get_preferences()
             return
-        if self.path == "/api/google/status":
+        if path == "/api/google/status":
             self._get_google_status()
             return
-        if self.path.startswith("/api/applications"):
+        if path.startswith("/api/applications"):
             self._get_applications()
             return
-        if self.path.startswith("/api/calendar/upcoming"):
+        if path.startswith("/api/calendar/upcoming"):
             self._get_calendar_upcoming()
             return
-        if self.path == "/api/drive/resumes":
+        if path == "/api/drive/resumes":
             self._get_drive_resumes()
             return
-        if self.path.startswith("/api/listings"):
+        if path.startswith("/api/listings"):
             self._get_listings()
             return
-        if self.path.startswith("/api/gmail/scan"):
+        if path.startswith("/api/gmail/scan"):
             self._get_gmail_scan()
             return
 
-        rel = STATIC_FILES.get(self.path)
+        rel = STATIC_FILES.get(path)
         if rel is None:
             self.send_error(404, "Not found")
             return
