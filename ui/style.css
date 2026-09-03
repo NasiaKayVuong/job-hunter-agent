@@ -67,8 +67,11 @@ header h1 {
 
 .status-line {
   font-size: 0.9rem;
-  margin: 0 0 0.9rem;
+  margin: 0.6rem 0 0;
 }
+
+.status-line.ok-text { color: var(--ok-fg); }
+.status-line.err-text { color: var(--err-fg); }
 
 .tabs {
   display: flex;

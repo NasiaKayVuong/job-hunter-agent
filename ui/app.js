@@ -120,6 +120,7 @@ $("setup-form").addEventListener("submit", async (e) => {
     };
   }
 
+  const saveStatusEl = $("save-status");
   try {
     const res = await fetch("/api/save", {
       method: "POST",
@@ -128,10 +129,16 @@ $("setup-form").addEventListener("submit", async (e) => {
     });
     if (!res.ok) throw new Error(await res.text());
     showStatus("Saved. Ask Claude to find jobs whenever you're ready.", "ok");
+    saveStatusEl.textContent = "✓ Saved";
+    saveStatusEl.className = "status-line ok-text";
+    saveStatusEl.hidden = false;
     await loadExisting();
     fileInput.value = "";
   } catch (err) {
     showStatus("Failed to save: " + err.message, "err");
+    saveStatusEl.textContent = "✗ Failed to save: " + err.message;
+    saveStatusEl.className = "status-line err-text";
+    saveStatusEl.hidden = false;
   }
 });
 
