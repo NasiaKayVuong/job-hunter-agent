@@ -160,17 +160,29 @@ so this repo needs its own.
    **Google Calendar API**, **Gmail API**, **Google Sheets API**, and
    **Google Drive API** in it (some may already be enabled if you're reusing
    a project).
-2. Under "APIs & Services → Credentials", create an **OAuth client ID** of
+2. Under "APIs & Services → OAuth consent screen", if this project's consent
+   screen is new, choose **External** user type and fill in the required
+   fields (app name, your email) — this puts it in **Testing** status, which
+   is fine and expected. Then, under its **"Audience"** (or **"Test users"**)
+   section, **add the Google account(s) you'll actually sign in with** —
+   including your own, even as the project owner. Skipping this is the #1
+   cause of setup failures: without it, sign-in fails with *"Access blocked:
+   ... has not completed the Google verification process"* / **Error 403:
+   access_denied**, because a Testing-status app only accepts accounts on
+   this explicit list. (You do not need to submit the app for Google's
+   verification — that's only required to move out of Testing entirely,
+   which this personal-use setup never needs to do.)
+3. Under "APIs & Services → Credentials", create an **OAuth client ID** of
    type **Desktop app** (or reuse an existing Desktop-app client from that
    project — a second, dedicated client is slightly cleaner since it keeps
    this tool's consent grant separate from anything else using that project,
    but either works). Download the JSON.
-3. Upload that JSON file in the desktop app's Connections tab ("1. Google
+4. Upload that JSON file in the desktop app's Connections tab ("1. Google
    OAuth client"), or save it yourself as `data/google/client_secret.json`
    (gitignored — never commit it) — either way works, the upload button
    just saves you finding the file path.
-4. `pip install -r requirements.txt`
-5. `python auth/google_auth.py` (or click "Connect Google account" in the
+5. `pip install -r requirements.txt`
+6. `python auth/google_auth.py` (or click "Connect Google account" in the
    desktop app's Connections tab) — opens a browser for you to authorize.
    Sign in with whichever Google account you want this tool to use — that
    choice is independent of which project/client issued the request. This
@@ -185,11 +197,18 @@ so this repo needs its own.
      changed, and your existing token doesn't have draft-creation access
      until you re-authorize.
 
+**If sign-in fails with "Access blocked: ... has not completed the Google
+verification process" / Error 403: access_denied** — you (or whoever's
+account you're signing in with) isn't on the Test users list yet. Go back to
+step 2, add that exact Google account under the OAuth consent screen's Test
+users, and try again — no need to touch the client_secret.json or reinstall
+anything.
+
 **Using it**, once set up:
 
 - The desktop app's **Connections** tab shows whether you're connected and
   has a one-click "Connect Google account" button (same underlying flow as
-  step 5 above).
+  step 6 above).
 - The **Listings** tab shows jobs Claude has found during a search, before
   you've decided to apply — mark ones **Interested** or **Passed** right
   there, then tell Claude to draft materials for whatever you marked

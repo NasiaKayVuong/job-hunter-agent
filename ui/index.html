@@ -205,6 +205,7 @@
       <p class="hint">Before connecting, this app needs an OAuth client from your own Google Cloud project — a small JSON file you download once. This part can't be automated from in here (there's no bootstrap credential to call Google's own APIs with), but uploading the resulting file can be.</p>
       <ol class="hint" style="padding-left: 1.1rem; margin: 0 0 0.8rem;">
         <li>In the <a href="https://console.cloud.google.com/" target="_blank" rel="noopener">Google Cloud Console</a>, create a project (or reuse one you already have) and enable the Calendar, Gmail, Sheets, and Drive APIs.</li>
+        <li>Under "APIs &amp; Services → OAuth consent screen", add the Google account(s) you'll sign in with under <strong>Test users</strong> — including your own. Skipping this causes an "Access blocked" / Error 403 when you try to connect below.</li>
         <li>Under "APIs &amp; Services → Credentials", create an OAuth client ID of type <strong>Desktop app</strong>, and download its JSON.</li>
         <li>Upload that JSON file below.</li>
       </ol>
@@ -216,6 +217,7 @@
     <section>
       <h2>2. Connect your account</h2>
       <p class="hint">One connection covers Calendar, Gmail (read-only search + draft creation, never send), Sheets, and Drive. See <code>CLAUDE.md</code> for exactly what is and isn't allowed with it (no sending email, no calendar invites, no editing files it didn't create).</p>
+      <p class="hint">Getting "Access blocked: ... has not completed the Google verification process" here? Go back to step 1 above and make sure the account you're signing in with is added as a Test user in the Google Cloud Console.</p>
       <p id="google-status" class="status-line">Checking…</p>
       <button type="button" id="google-connect-btn">Connect Google account</button>
     </section>
