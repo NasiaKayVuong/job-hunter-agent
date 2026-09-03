@@ -7,6 +7,7 @@ data/google/*
 !data/google/.gitkeep
 applications/*
 !applications/README.md
+state/session-log.md
 
 # Python
 __pycache__/

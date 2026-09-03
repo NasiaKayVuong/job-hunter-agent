@@ -21,11 +21,12 @@ There are two halves, deliberately separate:
   real application forms, and — once you confirm you've submitted — logging
   it to the tracker.
 
-1. Run the desktop app and set your resume/preferences (and, optionally,
-   connect Google for Calendar/Gmail/Sheets/Drive — see "Calendar and
-   tracking" below).
-2. Open this folder in Claude Code and ask it to find and apply to jobs (or
-   run the `/find-jobs` command).
+1. Open this folder in Claude Code and run `/start` — it reads
+   `state/session-log.md` (what happened last time, if anything), checks
+   your preferences/resume/connection status, and launches the desktop app
+   for you. (First time, or without Claude Code: just run the desktop app
+   directly and set your resume/preferences yourself — see "Setup" below.)
+2. Ask Claude to find and apply to jobs (or run the `/find-jobs` command).
 3. Claude searches, ranks, and — for the roles you approve — drafts tailored
    materials into `applications/<company>-<role>/`.
 4. Using the [claude-in-chrome](https://claude.com/chrome) browser extension, Claude
@@ -34,11 +35,55 @@ There are two halves, deliberately separate:
 5. Once you've actually submitted (Claude asks, never assumes), it logs the
    application to the tracker, and can create calendar events for interviews
    and scan your email for status updates.
-6. Check the desktop app's Applications and Calendar tabs any time to see
-   what's tracked — it's a live view of the same Sheet/Calendar Claude reads
+6. Check the desktop app's Listings, Applications, and Calendar tabs any time
+   to see what's tracked — live views of the same Sheet/Calendar Claude reads
    and writes to, not a separate copy.
+7. Claude appends a short entry to `state/session-log.md` after any real work
+   — so next time (even a different day, even a different machine if you're
+   syncing this repo — see "Persistence across sessions" below), running
+   `/start` picks the thread back up instead of starting from nothing.
 
 Nothing is ever submitted without you personally clicking the button.
+
+## Persistence across sessions
+
+Everything the tool needs to remember lives in files, not in any particular
+Claude conversation — a session must be open to *do* anything (search, draft,
+apply), but nothing is lost when it closes:
+
+- **Preferences and resume** — `config/preferences.json`, `data/resume/`.
+- **The tracker and listings** — a Google Sheet in your own Drive, not a
+  local file, so it's already available from any device once you connect
+  Google there.
+- **The narrative thread** — `state/session-log.md`, read by `/start` at the
+  beginning of every session.
+
+All three are gitignored in this repo (so the public template stays free of
+anyone's personal data), which means a plain `git clone` gives you the code
+but not your data — that's expected for a fresh setup, but if you want your
+*own* data to follow you across your own devices, see below.
+
+### Syncing across devices (optional)
+
+If you want your resume/preferences/session-log to follow you between your
+own machines, push your own copy of this repo to a **private** GitHub repo
+(never public — see "Privacy" below) and relax `.gitignore` in your copy for
+the files you want synced:
+
+```
+# In your own private fork's .gitignore, remove or comment out:
+config/preferences.json
+data/resume/*
+state/session-log.md
+```
+
+Then commit and push those files as normal, and `git pull` on your other
+device before running `/start` there. **Leave `data/google/*` gitignored
+everywhere, including your private repo** — that's your live OAuth client
+secret and token, and credentials shouldn't ride along in git even privately;
+just re-run the Google connect step once per device instead (one-time, low
+friction, meaningfully safer). `config/tracker.json` (Sheet/folder IDs) is
+fine to sync too since the actual tracker data lives in Drive either way.
 
 ## Setup
 
@@ -164,9 +209,10 @@ so this repo needs its own.
 
 ## What Claude will and won't do on its own
 
-- **Will:** search multiple sources (job boards + company career pages), rank matches
-  against your resume/preferences, draft a tailored resume and cover letter per role
-  you approve, autofill the real application form up to the review screen, and
+- **Will:** search multiple sources (job boards + company career pages), skip
+  anything you've already applied to or passed on, rank matches against your
+  resume/preferences, draft a tailored resume and cover letter per role you
+  approve, autofill the real application form up to the review screen, and
   (if you set up the optional Google integration) create calendar events and
   log/read the application tracker and listings.
 - **Won't:** click Submit/Apply, create accounts on your behalf, send a
@@ -199,7 +245,9 @@ tools/gmail_scan.py          read-only email scan for status updates
 tools/drive.py               import a resume from Drive; save drafts (create-only);
                               creates/finds the Job Tracker / Resumes / Cover Letters folders
 applications/                drafted materials + a log of what was searched/applied to (gitignored)
-.claude/commands/            /find-jobs, /schedule-interview, /sync-status
+state/session-log.md         narrative thread across sessions, read by /start (gitignored)
+state/session-log.example.md the format/discipline, with placeholder content
+.claude/commands/            /start, /find-jobs, /schedule-interview, /sync-status
 CLAUDE.md                    operating rules for Claude in this repo
 ```
 

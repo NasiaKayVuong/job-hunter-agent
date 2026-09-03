@@ -14,6 +14,18 @@ rules whenever the user asks you to find jobs, draft applications, or apply.
   anything — matching and tailoring should be grounded in what it actually says,
   never invented.
 
+## Session continuity
+
+`state/session-log.md` (gitignored — see `state/session-log.example.md` for
+the format) is the only memory of prior sessions; a fresh Claude Code session
+has no other way to know what happened before. **Read it at the start of any
+session that touches this repo**, before searching or drafting anything —
+the `/start` command does this automatically. **Append a new dated entry**
+(never rewrite prior ones) after any significant work: a search run, a batch
+of drafts, a status sync, anything the user would want a future session to
+know without re-explaining. Keep entries short — this is a narrative thread
+connecting sessions, not a duplicate of `applications/log.md` or the tracker.
+
 ## The hard rule: never submit
 
 **Never click a final Submit/Apply/Send control on any job application, on any
@@ -29,11 +41,21 @@ once" override — if the user wants something submitted, they click it.
 1. **Search.** Use web search and browser navigation (job boards, company career
    pages, niche/industry boards, or a company watchlist — whatever
    `preferences.json` specifies) to find current openings.
-2. **Filter and rank.** Match against the resume (skills, seniority, experience)
+2. **Dedup before presenting anything.** Read both `python tools/tracker.py
+   list` (real applications — any stage, including Rejected/Withdrawn) and
+   `python tools/listings.py list` (existing shortlist). Match by company +
+   title (fuzzy is fine — "Sr. Full Stack Engineer" and "Senior Full Stack
+   Engineer" at the same company is the same listing). Drop anything already
+   in the tracker outright — already applied, don't resurface it. For
+   something already in Listings: if status is "Passed", drop it too (the
+   user already said no); if "New"/"Interested"/"Applied", don't add a
+   duplicate row, just skip it in the new results (mention in passing that it
+   was already found before, if relevant).
+3. **Filter and rank.** Match against the resume (skills, seniority, experience)
    and the explicit preference fields (location, comp floor, industries excluded,
    employment type, dealbreakers). Drop anything that fails an explicit
    dealbreaker or excluded industry outright.
-3. **Shortlist.** Present ranked candidates to the user — company, role, comp,
+4. **Shortlist.** Present ranked candidates to the user — company, role, comp,
    location, source link, and why it matched — before drafting anything for them.
    Also record each one with `python tools/listings.py add --company ... --title
    ... --location ... --job-type ... --comp-range ... --source ... --url ...
@@ -43,21 +65,21 @@ once" override — if the user wants something submitted, they click it.
    of these" counts as approval for the whole batch; a listing marked
    "Interested" in the Listings tab also counts — check there if the user
    says something like "draft the ones I marked").
-4. **Draft.** For each approved job, write a tailored resume and cover letter into
+5. **Draft.** For each approved job, write a tailored resume and cover letter into
    `applications/<company>-<role-slug>/`. Tailor emphasis and phrasing to the
    posting; never invent experience, skills, or accomplishments that aren't
    grounded in the source resume.
-5. **Autofill.** Using claude-in-chrome, navigate to the job's original
+6. **Autofill.** Using claude-in-chrome, navigate to the job's original
    application page (the company's own site if the posting is there, otherwise
    the job board it's actually hosted on) and fill in the form: contact info,
    resume upload, cover letter, and any screener questions, using the drafted
    materials. Stop at the review screen. Screenshot it. Hand it to the user.
-6. **Log.** Append an entry to `applications/log.md` for every search run and
+7. **Log.** Append an entry to `applications/log.md` for every search run and
    every drafted/autofilled application: what was searched, what was found, what
    was drafted, what was filled in and where it stopped. This is the user's audit
    trail — keep it honest, including partial failures (a site that blocked
    automation, a form that couldn't be completed, etc.).
-7. **Track.** After the user confirms they actually submitted an application
+8. **Track.** After the user confirms they actually submitted an application
    (never before — an autofilled-but-unsubmitted form isn't a real application),
    record it with `python tools/tracker.py add ...`: company, title, job URL,
    source (the platform/site actually applied on), location, job type
