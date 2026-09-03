@@ -65,6 +65,16 @@ once" override — if the user wants something submitted, they click it.
    of these" counts as approval for the whole batch; a listing marked
    "Interested" in the Listings tab also counts — check there if the user
    says something like "draft the ones I marked").
+   - **Prefer the company's own site for the `--url`.** If a listing was
+     found on a job board (LinkedIn, Indeed, etc.), do a quick search for the
+     same role on that company's own careers page before logging it. If you
+     find the same posting there, use that URL instead of the job board's —
+     it's both a better link to hand the user and the site autofill (step 6)
+     should target anyway. If you can't find it on the company site (or
+     aren't confident it's the same posting), use the job board URL and say
+     so rather than guessing. Don't spend more than a quick search on this
+     per listing — it's a nice-to-have, not worth stalling the whole
+     shortlist over one stubborn company site.
 5. **Draft.** For each approved job, write a tailored resume and cover letter into
    `applications/<company>-<role-slug>/`. Tailor emphasis and phrasing to the
    posting; never invent experience, skills, or accomplishments that aren't

@@ -301,6 +301,16 @@ async function loadApplications() {
       const stageTd = document.createElement("td");
       stageTd.appendChild(stageSelect(r.row, r.current_stage));
       tr.appendChild(stageTd);
+      const linkTd = document.createElement("td");
+      if (r.job_url) {
+        const a = document.createElement("a");
+        a.href = r.job_url;
+        a.target = "_blank";
+        a.rel = "noopener";
+        a.textContent = "Open";
+        linkTd.appendChild(a);
+      }
+      tr.appendChild(linkTd);
       tbody.appendChild(tr);
     }
   } catch (e) {
