@@ -55,6 +55,18 @@ once" override — if the user wants something submitted, they click it.
    and the explicit preference fields (location, comp floor, industries excluded,
    employment type, dealbreakers). Drop anything that fails an explicit
    dealbreaker or excluded industry outright.
+   - **Years-of-experience check.** Compute the user's actual total years of
+     professional experience from the resume's employment history (sum/span
+     of relevant roles — use judgment on overlaps, don't just count job
+     count). Compare against each posting's stated minimum-years requirement
+     (when the posting states one). Drop it if it asks for more than actual
+     + `experience_years_tolerance` (default 3, see `preferences.json`) —
+     that's a real underqualification, not just a stretch, and won't lead
+     anywhere (this caught a real case: a posting wanting 8+ years against
+     ~5 actual). Don't hard-drop postings asking for *fewer* years than
+     actual minus the tolerance — that's potential overqualification, not
+     disqualifying — but do mention it in the shortlist rationale so the
+     user can judge for themselves.
 4. **Shortlist.** Present ranked candidates to the user — company, role, comp,
    location, source link, and why it matched — before drafting anything for them.
    Also record each one with `python tools/listings.py add --company ... --title
@@ -93,18 +105,31 @@ once" override — if the user wants something submitted, they click it.
    (never before — an autofilled-but-unsubmitted form isn't a real application),
    record it with `python tools/tracker.py add ...`: company, title, job URL,
    source (the platform/site actually applied on), location, job type
-   (remote/hybrid/onsite), which resume and cover letter version were used
-   (reference the files in `applications/<company>-<role-slug>/`), and a rough
-   skill-match assessment between the JD and the resume (state it as a rough
-   judgment, e.g. "7/10 — strong on React/TypeScript, light on the required Go
-   experience", never as a precise score). If the user asks you to also save
-   the tailored resume/cover letter to Drive (optional — local files under
-   `applications/` are the default, this is not required), use
-   `python tools/drive.py save-draft --path ... --name ... --kind resume` (or
-   `--kind cover_letter`) — this lands in the "Resumes"/"Cover Letters"
-   subfolder of the "Job Tracker" Drive folder (see `tools/drive.py`
-   `ensure_folders()`), the same folder the tracker Sheet lives in, and always
-   creates a new file rather than overwriting anything.
+   (remote/hybrid/onsite), and a rough skill-match assessment between the JD
+   and the resume (state it as a rough judgment, e.g. "7/10 — strong on
+   React/TypeScript, light on the required Go experience", never as a precise
+   score).
+   - **`--resume-version` / `--cover-letter-version` must be the actual
+     filename** (e.g. `resume.pdf`, `cover-letter.txt`) inside
+     `applications/<company>-<role-slug>/` — not a vague label like "v1" or
+     "tailored version". The point is the user can open the tracker, see
+     exactly which file was used for a given application, and go check it
+     without having to ask. If a file was also saved to Drive, mention that
+     filename too.
+   - There's no separate approval checkpoint for drafted content before
+     autofilling — the natural review points are the files themselves
+     (readable anytime in `applications/<company>-<role-slug>/` before you
+     move on to autofill) and the review screen before the user submits.
+     Don't invent an extra "approve this draft" step unless the user asks
+     for one; if they want to review before autofill happens, they'll say so.
+   - If the user asks you to also save the tailored resume/cover letter to
+     Drive (optional — local files under `applications/` are the default,
+     this is not required), use `python tools/drive.py save-draft --path ...
+     --name ... --kind resume` (or `--kind cover_letter`) — this lands in the
+     "Resumes"/"Cover Letters" subfolder of the "Job Tracker" Drive folder
+     (see `tools/drive.py` `ensure_folders()`), the same folder the tracker
+     Sheet lives in, and always creates a new file rather than overwriting
+     anything.
 
 ## Calendar and tracking
 

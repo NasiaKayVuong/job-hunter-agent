@@ -52,6 +52,10 @@
         <label>Seniority
           <input type="text" id="seniority" placeholder="e.g. match my resume, or: Senior only" />
         </label>
+        <label>Experience match tolerance (+/- years)
+          <input type="number" id="experience_years_tolerance" placeholder="3" min="0" max="15" step="1" />
+        </label>
+        <p class="hint">Claude computes your actual years of experience from your resume each search — this is just how far a posting's stated requirement can be above that before it's dropped as underqualified. Postings asking for fewer years aren't auto-dropped, just noted.</p>
       </section>
 
       <section>

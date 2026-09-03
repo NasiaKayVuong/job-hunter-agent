@@ -1,6 +1,7 @@
 {
   "target_titles": ["Product Manager", "Senior Product Manager"],
   "seniority": "match my resume",
+  "experience_years_tolerance": 3,
   "locations": {
     "remote": true,
     "hybrid_or_onsite_areas": ["Austin, TX"],

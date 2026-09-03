@@ -89,6 +89,9 @@ function fillForm(prefs) {
   if (!prefs) return;
   $("target_titles").value = (prefs.target_titles || []).join(", ");
   $("seniority").value = prefs.seniority || "";
+  if (prefs.experience_years_tolerance != null) {
+    $("experience_years_tolerance").value = prefs.experience_years_tolerance;
+  }
   const loc = prefs.locations || {};
   $("remote").checked = !!loc.remote;
   $("hybrid_areas").value = (loc.hybrid_or_onsite_areas || []).join(", ");
@@ -141,6 +144,9 @@ function buildPreferences() {
   return {
     target_titles: splitList($("target_titles").value),
     seniority: $("seniority").value.trim(),
+    experience_years_tolerance: $("experience_years_tolerance").value
+      ? Number($("experience_years_tolerance").value)
+      : 3,
     locations: {
       remote: $("remote").checked,
       hybrid_or_onsite_areas: splitList($("hybrid_areas").value),
