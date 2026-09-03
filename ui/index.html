@@ -68,6 +68,20 @@
       </section>
 
       <section>
+        <h2>Work authorization</h2>
+        <p class="hint">Used to answer citizenship/work-authorization screener questions directly instead of leaving them blank. Left as "Prefer not to say" until you set it.</p>
+        <label>Status
+          <select id="work_authorization">
+            <option value="">Prefer not to say / not set</option>
+            <option value="US Citizen">US Citizen</option>
+            <option value="Permanent Resident (Green Card)">Permanent Resident (Green Card)</option>
+            <option value="Visa sponsorship required">Visa sponsorship required</option>
+            <option value="Other">Other (specify in Notes)</option>
+          </select>
+        </label>
+      </section>
+
+      <section>
         <h2>Compensation</h2>
         <label>Floor (base salary, USD)
           <input type="number" id="comp_floor" placeholder="130000" min="0" step="1000" />

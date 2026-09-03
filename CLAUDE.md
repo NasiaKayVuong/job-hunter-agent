@@ -181,6 +181,10 @@ once" override — if the user wants something submitted, they click it.
   here?") without either using content the user already provided or explicitly
   flagging the answer as a draft for the user's review — never invent specifics
   about the user's motivations.
+- Citizenship/work-authorization questions: use `preferences.json`'s
+  `work_authorization` field if it's set (non-empty). If it's empty/not set,
+  leave the question blank on the form and flag it clearly at the review-
+  screen handoff — never guess someone's legal status.
 - If a site requires solving a CAPTCHA or blocks automated form-filling, stop and
   tell the user rather than trying to work around it.
 - If the resume or preferences file is missing, ask the user to set them up via

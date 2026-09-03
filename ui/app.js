@@ -96,6 +96,7 @@ function fillForm(prefs) {
   $("remote").checked = !!loc.remote;
   $("hybrid_areas").value = (loc.hybrid_or_onsite_areas || []).join(", ");
   $("relocation").checked = !!loc.open_to_relocation;
+  $("work_authorization").value = prefs.work_authorization || "";
   const comp = prefs.compensation || {};
   if (comp.floor != null) $("comp_floor").value = comp.floor;
   if (comp.flexible_down_to != null) $("comp_flex").value = comp.flexible_down_to;
@@ -152,6 +153,7 @@ function buildPreferences() {
       hybrid_or_onsite_areas: splitList($("hybrid_areas").value),
       open_to_relocation: $("relocation").checked,
     },
+    work_authorization: $("work_authorization").value,
     compensation: {
       currency: "USD",
       floor: $("comp_floor").value ? Number($("comp_floor").value) : null,
