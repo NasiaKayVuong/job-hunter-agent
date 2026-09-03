@@ -7,6 +7,33 @@ function showStatus(message, kind) {
   statusEl.hidden = false;
 }
 
+// ---------- Wide/compact layout toggle ----------
+
+function applyWidthMode(wide) {
+  document.querySelector(".app").classList.toggle("wide", wide);
+  $("toggle-width-btn").textContent = wide ? "⤡ Compact view" : "⤢ Expand view";
+}
+
+(function initWidthMode() {
+  let wide = false;
+  try {
+    wide = localStorage.getItem("jha-wide-view") === "1";
+  } catch (e) {
+    // localStorage unavailable — default to compact, no big deal.
+  }
+  applyWidthMode(wide);
+})();
+
+$("toggle-width-btn").addEventListener("click", () => {
+  const nowWide = !document.querySelector(".app").classList.contains("wide");
+  applyWidthMode(nowWide);
+  try {
+    localStorage.setItem("jha-wide-view", nowWide ? "1" : "0");
+  } catch (e) {
+    // Fine if this doesn't persist — it still works for the current session.
+  }
+});
+
 function splitList(value) {
   return value
     .split(",")
