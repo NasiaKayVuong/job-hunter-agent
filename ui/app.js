@@ -151,6 +151,7 @@ document.querySelectorAll(".tab-btn").forEach((btn) => {
     btn.classList.add("active");
     $("panel-" + btn.dataset.tab).hidden = false;
     if (btn.dataset.tab === "connections") loadGoogleStatus();
+    if (btn.dataset.tab === "listings") loadListings();
     if (btn.dataset.tab === "applications") loadApplications();
     if (btn.dataset.tab === "calendar") loadCalendar();
   });
@@ -205,6 +206,42 @@ $("google-connect-btn").addEventListener("click", async () => {
 
 // ---------- Applications ----------
 
+const STAGE_OPTIONS = [
+  "Applied", "Phone Screen", "Technical", "Onsite", "Offer", "Rejected", "Withdrawn",
+];
+
+function stageSelect(row, currentStage) {
+  const select = document.createElement("select");
+  const options = STAGE_OPTIONS.includes(currentStage) || !currentStage
+    ? STAGE_OPTIONS
+    : [currentStage, ...STAGE_OPTIONS];
+  for (const opt of options) {
+    const o = document.createElement("option");
+    o.value = opt;
+    o.textContent = opt;
+    if (opt === currentStage) o.selected = true;
+    select.appendChild(o);
+  }
+  select.addEventListener("change", async () => {
+    select.disabled = true;
+    try {
+      const res = await fetch("/api/applications/status", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ row, stage: select.value }),
+      });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      showStatus(`Updated to "${select.value}".`, "ok");
+    } catch (e) {
+      showStatus("Couldn't update stage: " + e.message, "err");
+    } finally {
+      select.disabled = false;
+    }
+  });
+  return select;
+}
+
 async function loadApplications() {
   const tbody = document.querySelector("#applications-table tbody");
   const empty = $("applications-empty");
@@ -227,13 +264,16 @@ async function loadApplications() {
       const tr = document.createElement("tr");
       const cells = [
         r.date_applied, r.company, r.title, r.source,
-        r.location, r.job_type, r.skill_match, r.current_stage,
+        r.location, r.job_type, r.skill_match,
       ];
       for (const c of cells) {
         const td = document.createElement("td");
         td.textContent = c || "";
         tr.appendChild(td);
       }
+      const stageTd = document.createElement("td");
+      stageTd.appendChild(stageSelect(r.row, r.current_stage));
+      tr.appendChild(stageTd);
       tbody.appendChild(tr);
     }
   } catch (e) {
@@ -243,6 +283,124 @@ async function loadApplications() {
 }
 
 $("refresh-applications-btn").addEventListener("click", loadApplications);
+
+// ---------- Email status scan (read-only) ----------
+
+$("scan-email-btn").addEventListener("click", async () => {
+  const btn = $("scan-email-btn");
+  const list = $("email-scan-list");
+  const empty = $("email-scan-empty");
+  list.innerHTML = "";
+  empty.hidden = true;
+  btn.disabled = true;
+  btn.textContent = "Scanning…";
+  try {
+    const res = await fetch("/api/gmail/scan");
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    const candidates = data.candidates || [];
+    if (candidates.length === 0) {
+      empty.hidden = false;
+      return;
+    }
+    for (const c of candidates) {
+      const li = document.createElement("li");
+      li.innerHTML = `<strong>${c.subject || "(no subject)"}</strong><br>
+        <span class="hint">${c.from} — ${c.date}</span><br>
+        <span class="hint">${c.snippet}</span><br>
+        <em>Guess: ${c.guessed_status}</em>`;
+      list.appendChild(li);
+    }
+  } catch (e) {
+    empty.textContent = "Couldn't scan email: " + e.message;
+    empty.hidden = false;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Scan email for updates";
+  }
+});
+
+// ---------- Listings ----------
+
+const LISTING_STATUS_OPTIONS = ["New", "Interested", "Passed", "Applied"];
+
+function listingStatusSelect(row, currentStatus) {
+  const select = document.createElement("select");
+  for (const opt of LISTING_STATUS_OPTIONS) {
+    const o = document.createElement("option");
+    o.value = opt;
+    o.textContent = opt;
+    if (opt === currentStatus) o.selected = true;
+    select.appendChild(o);
+  }
+  select.addEventListener("change", async () => {
+    select.disabled = true;
+    try {
+      const res = await fetch("/api/listings/status", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ row, status: select.value }),
+      });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      showStatus(`Marked "${select.value}".`, "ok");
+    } catch (e) {
+      showStatus("Couldn't update status: " + e.message, "err");
+    } finally {
+      select.disabled = false;
+    }
+  });
+  return select;
+}
+
+async function loadListings() {
+  const tbody = document.querySelector("#listings-table tbody");
+  const empty = $("listings-empty");
+  tbody.innerHTML = "";
+  empty.hidden = true;
+  try {
+    const res = await fetch("/api/listings");
+    const data = await res.json();
+    if (data.error) {
+      empty.textContent = data.error;
+      empty.hidden = false;
+      return;
+    }
+    const rows = data.listings || [];
+    if (rows.length === 0) {
+      empty.hidden = false;
+      return;
+    }
+    for (const r of rows) {
+      const tr = document.createElement("tr");
+      const cells = [r.date_found, r.company, r.title, r.location, r.job_type, r.comp_range, r.source, r.match_notes];
+      for (const c of cells) {
+        const td = document.createElement("td");
+        td.textContent = c || "";
+        tr.appendChild(td);
+      }
+      const statusTd = document.createElement("td");
+      statusTd.appendChild(listingStatusSelect(r.row, r.status));
+      tr.appendChild(statusTd);
+      const linkTd = document.createElement("td");
+      if (r.url) {
+        const a = document.createElement("a");
+        a.href = r.url;
+        a.target = "_blank";
+        a.rel = "noopener";
+        a.textContent = "Open";
+        linkTd.appendChild(a);
+      }
+      tr.appendChild(linkTd);
+      tbody.appendChild(tr);
+    }
+  } catch (e) {
+    empty.textContent = "Couldn't load listings: " + e.message;
+    empty.hidden = false;
+  }
+}
+
+$("refresh-listings-btn").addEventListener("click", loadListings);
 
 // ---------- Calendar ----------
 

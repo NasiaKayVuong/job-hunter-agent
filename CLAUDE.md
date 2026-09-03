@@ -35,8 +35,14 @@ once" override — if the user wants something submitted, they click it.
    dealbreaker or excluded industry outright.
 3. **Shortlist.** Present ranked candidates to the user — company, role, comp,
    location, source link, and why it matched — before drafting anything for them.
-   Don't draft materials for jobs the user hasn't at least implicitly approved
-   (an explicit "do all of these" counts as approval for the whole batch).
+   Also record each one with `python tools/listings.py add --company ... --title
+   ... --location ... --job-type ... --comp-range ... --source ... --url ...
+   --match-notes ...` so it shows up in the desktop app's Listings tab, where
+   the user can mark it Interested/Passed on their own. Don't draft materials
+   for jobs the user hasn't at least implicitly approved (an explicit "do all
+   of these" counts as approval for the whole batch; a listing marked
+   "Interested" in the Listings tab also counts — check there if the user
+   says something like "draft the ones I marked").
 4. **Draft.** For each approved job, write a tailored resume and cover letter into
    `applications/<company>-<role-slug>/`. Tailor emphasis and phrasing to the
    posting; never invent experience, skills, or accomplishments that aren't
@@ -98,12 +104,16 @@ once" override — if the user wants something submitted, they click it.
   `tools/drive.py ensure_folders()` and `tools/tracker.py ensure_sheet()`, IDs
   cached in `config/tracker.json`, gitignored). It's meant to be opened and
   edited by the user directly too — don't treat it as a Claude-only data store.
-- The desktop app (`python app.py`) is a viewer/input surface only — Setup,
-  Connections status, the Applications table, and upcoming Calendar events.
-  It never searches, drafts, or autofills anything itself; that's exclusively
-  Claude's job, per this file. Don't add functionality to `app.py`/`ui/` that
-  duplicates the workflow above — the app reads/displays what Claude and
-  these tools produce.
+- The desktop app (`python app.py`) is a viewer/input surface, plus a few
+  self-service actions that involve no judgment: it can call
+  `tools/gmail_scan.py scan` directly (a button, read-only, same keyword
+  heuristic Claude uses — no LLM judgment happens there either way) and let
+  the user apply `tools/tracker.py update-stage` / `tools/listings.py
+  update-status` themselves via dropdowns, instead of asking Claude to do it.
+  What it must never do: search job boards, rank/match against the resume,
+  draft anything, or autofill an application — anything requiring judgment
+  or writing on the user's behalf stays exclusively Claude's job. Don't add
+  functionality to `app.py`/`ui/` that crosses that line.
 
 ## Boundaries
 
@@ -129,3 +139,8 @@ once" override — if the user wants something submitted, they click it.
 - `tools/drive.py` is create-only and read-only — there is no update/
   overwrite/delete function for Drive files anywhere in this repo. Never edit
   or delete a file in the user's Drive that this tool didn't itself create.
+- `tools/listings.py` is a shortlist, not the tracker — a row there being
+  "Interested" doesn't mean an application exists yet, and a row being
+  "Passed" doesn't need to be deleted (there's no delete function; leave it).
+  Only `tools/tracker.py add` creates a real tracked application, and only
+  after the user confirms an actual submission.

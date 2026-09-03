@@ -3,10 +3,10 @@
 
 Core (Setup tab: preferences + resume) needs no external packages — stdlib
 only, matching the rest of this file's original design. The Connections/
-Applications/Calendar tabs talk to Google APIs and need the packages in
-requirements.txt; if those aren't installed, those endpoints return a clear
-JSON error instead of crashing the server, so the Setup tab keeps working
-either way.
+Listings/Applications/Calendar tabs talk to Google APIs and need the packages
+in requirements.txt; if those aren't installed, those endpoints return a
+clear JSON error instead of crashing the server, so the Setup tab keeps
+working either way.
 
 Run standalone (opens in your normal browser):
     python ui/server.py
@@ -93,6 +93,12 @@ class Handler(BaseHTTPRequestHandler):
         if self.path == "/api/drive/resumes":
             self._get_drive_resumes()
             return
+        if self.path.startswith("/api/listings"):
+            self._get_listings()
+            return
+        if self.path.startswith("/api/gmail/scan"):
+            self._get_gmail_scan()
+            return
 
         rel = STATIC_FILES.get(self.path)
         if rel is None:
@@ -162,6 +168,28 @@ class Handler(BaseHTTPRequestHandler):
         except Exception as e:
             self._send_json(200, {"error": str(e)})
 
+    def _get_listings(self):
+        try:
+            from tools.listings import list_listings
+        except ImportError:
+            self._send_json(200, _google_unavailable_error())
+            return
+        try:
+            self._send_json(200, {"listings": list_listings()})
+        except Exception as e:
+            self._send_json(200, {"error": str(e)})
+
+    def _get_gmail_scan(self):
+        try:
+            from tools.gmail_scan import scan
+        except ImportError:
+            self._send_json(200, _google_unavailable_error())
+            return
+        try:
+            self._send_json(200, {"candidates": scan(days=30)})
+        except Exception as e:
+            self._send_json(200, {"error": str(e)})
+
     # ---- POST ----
 
     def do_POST(self):
@@ -173,6 +201,12 @@ class Handler(BaseHTTPRequestHandler):
             return
         if self.path == "/api/drive/import-resume":
             self._post_drive_import_resume()
+            return
+        if self.path == "/api/listings/status":
+            self._post_listing_status()
+            return
+        if self.path == "/api/applications/status":
+            self._post_application_status()
             return
         self.send_error(404, "Not found")
 
@@ -227,6 +261,38 @@ class Handler(BaseHTTPRequestHandler):
                 self._send_json(400, {"error": "Missing file_id"})
                 return
             self._send_json(200, import_resume(file_id))
+        except Exception as e:
+            self._send_json(200, {"error": str(e)})
+
+    def _post_listing_status(self):
+        try:
+            from tools.listings import update_status
+        except ImportError:
+            self._send_json(200, _google_unavailable_error())
+            return
+        try:
+            payload = self._read_json_body()
+            row, status = payload.get("row"), payload.get("status")
+            if not row or not status:
+                self._send_json(400, {"error": "Missing row or status"})
+                return
+            self._send_json(200, update_status(row, status))
+        except Exception as e:
+            self._send_json(200, {"error": str(e)})
+
+    def _post_application_status(self):
+        try:
+            from tools.tracker import update_stage
+        except ImportError:
+            self._send_json(200, _google_unavailable_error())
+            return
+        try:
+            payload = self._read_json_body()
+            row, stage = payload.get("row"), payload.get("stage")
+            if not row or not stage:
+                self._send_json(400, {"error": "Missing row or stage"})
+                return
+            self._send_json(200, update_stage(row, stage))
         except Exception as e:
             self._send_json(200, {"error": str(e)})
 

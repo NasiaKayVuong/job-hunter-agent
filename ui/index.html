@@ -16,6 +16,7 @@
   <nav class="tabs" id="tabs">
     <button class="tab-btn active" data-tab="setup" type="button">Setup</button>
     <button class="tab-btn" data-tab="connections" type="button">Connections</button>
+    <button class="tab-btn" data-tab="listings" type="button">Listings</button>
     <button class="tab-btn" data-tab="applications" type="button">Applications</button>
     <button class="tab-btn" data-tab="calendar" type="button">Calendar</button>
   </nav>
@@ -124,11 +125,32 @@
     </section>
   </section>
 
+  <!-- ===== Listings ===== -->
+  <section class="tab-panel" id="panel-listings" hidden>
+    <section>
+      <h2>Candidate listings</h2>
+      <p class="hint">Jobs Claude has found during a search, before you've decided to apply. Mark ones you like as Interested, or Pass on ones you don't — tell Claude to draft materials for anything marked Interested whenever you're ready.</p>
+      <button type="button" id="refresh-listings-btn" class="secondary">Refresh</button>
+      <div class="table-wrap">
+        <table id="listings-table">
+          <thead>
+            <tr>
+              <th>Found</th><th>Company</th><th>Title</th><th>Location</th>
+              <th>Type</th><th>Comp</th><th>Source</th><th>Match notes</th><th>Status</th><th></th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <p id="listings-empty" class="hint" hidden>No listings yet — ask Claude to find some jobs.</p>
+    </section>
+  </section>
+
   <!-- ===== Applications ===== -->
   <section class="tab-panel" id="panel-applications" hidden>
     <section>
       <h2>Tracked applications</h2>
-      <p class="hint">Live view of the tracker Sheet in your Drive (Job Tracker folder). Claude adds rows here once you confirm an application was actually submitted.</p>
+      <p class="hint">Live view of the tracker Sheet in your Drive (Job Tracker folder). Claude adds rows here once you confirm an application was actually submitted. Changing "Stage" here updates the same Sheet Claude reads.</p>
       <button type="button" id="refresh-applications-btn" class="secondary">Refresh</button>
       <div class="table-wrap">
         <table id="applications-table">
@@ -142,6 +164,14 @@
         </table>
       </div>
       <p id="applications-empty" class="hint" hidden>No tracked applications yet.</p>
+    </section>
+
+    <section>
+      <h2>Check email for updates</h2>
+      <p class="hint">Reads recent email (read-only — never sends or modifies anything) for likely interview/rejection/offer messages. The status shown is a rough keyword guess, not verified — read each one and use the Stage dropdown above to actually update the tracker.</p>
+      <button type="button" id="scan-email-btn" class="secondary">Scan email for updates</button>
+      <ul id="email-scan-list" class="picker-list"></ul>
+      <p id="email-scan-empty" class="hint" hidden>Nothing found in the last 30 days.</p>
     </section>
   </section>
 

@@ -127,20 +127,37 @@ so this repo needs its own.
 - The desktop app's **Connections** tab shows whether you're connected and
   has a one-click "Connect Google account" button (same underlying flow as
   step 5 above).
-- The **Applications** tab shows a live table of everything tracked; the
-  **Calendar** tab shows your next 30 days of interviews. Both just read —
-  all writing happens through Claude.
+- The **Listings** tab shows jobs Claude has found during a search, before
+  you've decided to apply — mark ones **Interested** or **Passed** right
+  there, then tell Claude to draft materials for whatever you marked
+  Interested.
+- The **Applications** tab shows a live table of everything actually tracked
+  (i.e. submitted). Its **Stage** column is an editable dropdown — changing it
+  updates the same Sheet Claude reads, no need to ask Claude for a routine
+  status bump.
+- The **Calendar** tab shows your next 30 days of interviews (read-only).
+- In Applications, **"Scan email for updates"** reads recent email (read-only
+  — never sends or modifies anything) for likely interview/rejection/offer
+  messages and shows you the candidates with a rough keyword guess at what
+  each one is — read them yourself and use the Stage dropdown to actually
+  update the tracker. This is the same tool `/sync-status` uses; the button
+  just lets you do it yourself without asking Claude. Note: **the desktop app
+  has no live connection to Claude** — it can run this one read-only scan and
+  let you apply status changes, but it can't itself search jobs, draft
+  anything, or decide what an email means; that judgment stays with you or
+  with Claude in a chat.
 - In Setup, "Import from Drive instead" lets you pick your resume from Drive
   rather than uploading a local file.
 - Ask Claude to schedule an interview, or run `/schedule-interview` — creates
   a calendar event (never with attendees; if you want to invite someone,
   do that yourself in Google Calendar).
-- Ask Claude to check for updates, or run `/sync-status` — reads recent email
-  (read-only) for likely status changes, shows you the candidates it found,
-  and only updates the tracker for the ones you confirm.
-- The tracker itself is a normal Google Sheet in the "Job Tracker" folder in
-  your own Drive — open it, edit it, or add rows by hand any time; Claude
-  reads and writes to the same sheet, not a separate copy.
+- Ask Claude to check for updates, or run `/sync-status` for the same
+  email-scan-then-confirm flow as the button above, driven through chat
+  instead.
+- The tracker itself is a normal Google Sheet (with a second "Listings" tab)
+  in the "Job Tracker" folder in your own Drive — open it, edit it, or add
+  rows by hand any time; Claude and the desktop app both read and write to
+  the same sheet, not a separate copy.
 - Claude can look at the tracker's history to help decide what to search for
   next — which titles, sources, or resume/cover-letter versions are actually
   getting responses.
@@ -151,12 +168,16 @@ so this repo needs its own.
   against your resume/preferences, draft a tailored resume and cover letter per role
   you approve, autofill the real application form up to the review screen, and
   (if you set up the optional Google integration) create calendar events and
-  log/read the application tracker.
+  log/read the application tracker and listings.
 - **Won't:** click Submit/Apply, create accounts on your behalf, send a
   calendar invite to anyone, send or reply to any email, or send anything
   without showing you first. Every autofilled application is left open for
   your own review and submission; every tracker status change from a scanned
-  email is confirmed by you first.
+  email is confirmed by you first — by Claude in chat, or by you directly in
+  the desktop app.
+- The desktop app itself never searches, ranks, or drafts anything — it can
+  run one read-only email scan and let you apply status changes yourself, but
+  the judgment calls stay with Claude or with you.
 - Read `CLAUDE.md` for the exact operating rules Claude follows in this repo.
 
 ## Repo layout
@@ -173,6 +194,7 @@ ui/                          the dashboard (server.py + index.html/app.js/style.
 auth/google_auth.py          shared Google OAuth helper (Calendar, Gmail-read, Sheets, Drive)
 tools/gcal.py                create/list calendar events (no attendees, ever)
 tools/tracker.py             read/write the application tracker (Google Sheet)
+tools/listings.py            read/write candidate listings (2nd tab, same Sheet)
 tools/gmail_scan.py          read-only email scan for status updates
 tools/drive.py               import a resume from Drive; save drafts (create-only);
                               creates/finds the Job Tracker / Resumes / Cover Letters folders
