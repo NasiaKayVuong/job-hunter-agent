@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
-"""Read-only Gmail scan for application status updates.
+"""Read-only Gmail scan for application status updates AND new opportunities.
 
 Uses the gmail.readonly scope only — there is no send/reply/modify code path
 anywhere in this file or anywhere else in this repo. It searches for likely
-interview/rejection/offer emails and prints candidates with a *guessed*
-status for a human (or Claude, with the user watching) to confirm before
-anything gets written to the tracker via tools/tracker.py update-stage.
-Never treat the guess as ground truth — subject-line keyword matching is
-approximate and will misclassify some emails.
+interview/rejection/offer emails *and* emails pitching a new opportunity
+(recruiter outreach, a role forwarded to you, etc.), and prints candidates
+with a *guessed* category for a human (or Claude, with the user watching) to
+read and act on. Never treat the guess as ground truth — keyword matching on
+the subject/snippet is approximate and will misclassify some emails; for new
+opportunities in particular, the real job details (company, title, comp,
+location) have to be read from the full email body, not guessed from a
+snippet — see CLAUDE.md's "New opportunities found in email".
 
 Usage:
   python tools/gmail_scan.py scan [--days 30] [--company "Acme"]
@@ -33,6 +36,20 @@ INTERVIEW_HINTS = [
     "would like to speak", "chat with", "meet the team",
 ]
 OFFER_HINTS = ["offer", "excited to extend", "pleased to offer"]
+OPPORTUNITY_HINTS = [
+    "opportunity", "reaching out", "came across your", "open role",
+    "open position", "thought of you", "would you be interested",
+    "role for you", "hiring for",
+]
+
+# Search terms cast a fairly wide net on purpose — false positives here just
+# mean one more row Claude/the user reads and discards; false negatives mean
+# a real update or opportunity gets missed entirely, which is worse.
+SEARCH_TERMS = [
+    "interview", "offer", "unfortunately", '"next steps"',
+    "opportunity", "role", "position", "hiring", "recruiter",
+    '"reaching out"', "job",
+]
 
 
 def _service():
@@ -47,11 +64,13 @@ def _guess_status(subject, snippet):
         return "possible rejection"
     if any(h in text for h in INTERVIEW_HINTS):
         return "possible interview/next step"
+    if any(h in text for h in OPPORTUNITY_HINTS):
+        return "possible new opportunity"
     return "unclassified"
 
 
 def scan(days=30, company=None):
-    query_parts = [f"newer_than:{days}d", "(interview OR offer OR unfortunately OR \"next steps\")"]
+    query_parts = [f"newer_than:{days}d", "(" + " OR ".join(SEARCH_TERMS) + ")"]
     if company:
         query_parts.append(f'"{company}"')
     query = " ".join(query_parts)

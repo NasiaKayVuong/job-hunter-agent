@@ -149,6 +149,27 @@ once" override — if the user wants something submitted, they click it.
   is, and only then call `python tools/tracker.py update-stage --row N --stage
   "..."` for the ones the user confirms. Never auto-update the tracker from a
   guess alone.
+- **New opportunities found in email.** Some scanned emails won't be status
+  updates on an existing application at all — they'll be a new opportunity
+  (recruiter outreach, a company reaching out directly, a mailing-list
+  digest with a specific role). The scan tool won't tell you which; you have
+  to actually read the email content to tell the difference (its keyword
+  guess is tuned for status words, not for "is this pitching me a job").
+  When you find one:
+  - Extract what's actually stated (company, title, and whatever else is
+    given — location, comp, a link) — don't invent details the email
+    doesn't contain.
+  - Run it through the same checks a search result gets: dedup against the
+    tracker and existing Listings (step 2 of the main workflow), filter
+    against preferences (step 3, including the years-of-experience check),
+    and the company-site-URL preference if a link is given and it's job-
+    board-sourced.
+  - If it survives those checks, log it with `python tools/listings.py add`
+    same as any other found listing, with `--source` noting it came from
+    email (e.g. `"Email (recruiter outreach)"`) so the user can tell the
+    provenance apart from a board/company-site find.
+  - Still show it to the user as part of the same shortlist-style summary —
+    don't silently add rows without saying so.
 - **Using the tracker for better search.** Before ranking a new shortlist, you
   can read the full tracker with `python tools/tracker.py list` and look for
   patterns — which titles, sources, locations, or resume/cover-letter versions
