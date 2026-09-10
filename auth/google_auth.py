@@ -20,6 +20,7 @@ import wsgiref.simple_server
 import wsgiref.util
 from pathlib import Path
 
+from google.auth.exceptions import RefreshError
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -194,9 +195,19 @@ def get_credentials():
         creds = Credentials.from_authorized_user_file(str(TOKEN_PATH), SCOPES)
 
     if not creds or not creds.valid:
+        refreshed = False
         if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
-        else:
+            try:
+                creds.refresh(Request())
+                refreshed = True
+            except RefreshError:
+                # A refresh token can be expired or revoked (e.g. an OAuth app
+                # still in "Testing" status expires them after 7 days -- the
+                # API answers "invalid_grant"). Fall through to a fresh browser
+                # consent instead of failing every call until someone deletes
+                # token.json by hand.
+                refreshed = False
+        if not refreshed:
             flow = InstalledAppFlow.from_client_secrets_file(str(CLIENT_SECRET_PATH), SCOPES)
             creds = _run_local_auth_flow(flow)
         GOOGLE_DIR.mkdir(parents=True, exist_ok=True)
