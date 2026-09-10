@@ -112,18 +112,39 @@
 
       <section>
         <h2>Location</h2>
-        <label>Work arrangement
-          <select id="location_type">
-            <option value="any">Open to any (remote, hybrid, or onsite)</option>
-            <option value="remote_only">Remote only</option>
-            <option value="hybrid_only">Hybrid only</option>
-            <option value="onsite_only">Onsite only</option>
-          </select>
-        </label>
-        <label>Hybrid/onsite area(s) <span class="hint">(ignored if "Remote only" is selected above)</span>
+        <p class="hint">Work arrangement: tick every arrangement you'd take. Listings whose arrangement isn't ticked are dropped. Nothing ticked means open to any.</p>
+        <label class="checkbox"><input type="checkbox" id="arr_remote" /> Remote</label>
+        <label class="checkbox"><input type="checkbox" id="arr_hybrid" /> Hybrid</label>
+        <label class="checkbox"><input type="checkbox" id="arr_onsite" /> Onsite</label>
+        <label>Hybrid/onsite area(s) <span class="hint">(ignored if only "Remote" is ticked above)</span>
           <input type="text" id="hybrid_areas" placeholder="e.g. Chicago, IL" />
         </label>
         <label class="checkbox"><input type="checkbox" id="relocation" /> Open to relocation</label>
+      </section>
+
+      <section>
+        <h2>Profile</h2>
+        <p class="hint">Filled straight into the matching application-form fields (city/location, LinkedIn, GitHub/portfolio). Leave any of them empty to have that field left blank on forms.</p>
+        <label>Current location (city, state)
+          <input type="text" id="profile_location" placeholder="e.g. San Francisco, CA" />
+        </label>
+        <label>LinkedIn profile URL
+          <input type="url" id="profile_linkedin" placeholder="https://www.linkedin.com/in/your-handle/" />
+        </label>
+        <label>GitHub / portfolio URL
+          <input type="url" id="profile_github" placeholder="https://github.com/your-handle" />
+        </label>
+      </section>
+
+      <section>
+        <h2>Voluntary self-identification</h2>
+        <p class="hint">Most US application forms end with optional EEO questions (gender, race/ethnicity, veteran status, disability). Claude never enters demographic answers itself; this controls what it does with those questions.</p>
+        <label>On those questions
+          <select id="voluntary_self_identification">
+            <option value="decline">Select "Decline to self-identify" / "Prefer not to say"</option>
+            <option value="user_fills">Leave them blank for me to fill in at the review screen</option>
+          </select>
+        </label>
       </section>
 
       <section>

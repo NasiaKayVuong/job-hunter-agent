@@ -3,10 +3,16 @@
   "seniority": "match my resume",
   "experience_years_tolerance": 3,
   "locations": {
-    "type": "any",
+    "arrangements": ["remote", "hybrid"],
     "hybrid_or_onsite_areas": ["Austin, TX"],
     "open_to_relocation": true
   },
+  "profile": {
+    "location": "Austin, TX",
+    "linkedin_url": "https://www.linkedin.com/in/your-handle/",
+    "github_url": "https://github.com/your-handle"
+  },
+  "voluntary_self_identification": "decline",
   "work_authorization": "",
   "compensation": {
     "currency": "USD",

@@ -85,16 +85,27 @@ function splitLines(value) {
     .filter(Boolean);
 }
 
-// Preferences saved before the explicit "Work arrangement" selector only had
-// a `remote` boolean + a free-text hybrid/onsite areas list — derive the
-// closest new `type` value from that so old preferences.json files still
-// load sensibly instead of silently resetting to "any".
-function deriveLegacyLocationType(loc) {
+const ALL_ARRANGEMENTS = ["remote", "hybrid", "onsite"];
+
+// Work arrangement is a multi-select list (`locations.arrangements`). Older
+// preferences.json files carried either a single `type` enum ("any" /
+// "remote_only" / "hybrid_only" / "onsite_only") or, before that, just a
+// `remote` boolean + a free-text hybrid/onsite areas list — map either of
+// those onto the list so old files still load sensibly instead of silently
+// resetting to "open to any".
+function deriveArrangements(loc) {
+  if (Array.isArray(loc.arrangements)) return loc.arrangements;
+  switch (loc.type) {
+    case "remote_only": return ["remote"];
+    case "hybrid_only": return ["hybrid"];
+    case "onsite_only": return ["onsite"];
+    case "any": return ALL_ARRANGEMENTS;
+  }
   const hasAreas = (loc.hybrid_or_onsite_areas || []).length > 0;
-  if (loc.remote && hasAreas) return "any";
-  if (loc.remote) return "remote_only";
-  if (hasAreas) return "hybrid_only";
-  return "any";
+  if (loc.remote && hasAreas) return ALL_ARRANGEMENTS;
+  if (loc.remote) return ["remote"];
+  if (hasAreas) return ["hybrid", "onsite"];
+  return ALL_ARRANGEMENTS;
 }
 
 function fillForm(prefs) {
@@ -105,9 +116,17 @@ function fillForm(prefs) {
     $("experience_years_tolerance").value = prefs.experience_years_tolerance;
   }
   const loc = prefs.locations || {};
-  $("location_type").value = loc.type || deriveLegacyLocationType(loc);
+  const arrangements = deriveArrangements(loc);
+  $("arr_remote").checked = arrangements.includes("remote");
+  $("arr_hybrid").checked = arrangements.includes("hybrid");
+  $("arr_onsite").checked = arrangements.includes("onsite");
   $("hybrid_areas").value = (loc.hybrid_or_onsite_areas || []).join(", ");
   $("relocation").checked = !!loc.open_to_relocation;
+  const profile = prefs.profile || {};
+  $("profile_location").value = profile.location || "";
+  $("profile_linkedin").value = profile.linkedin_url || "";
+  $("profile_github").value = profile.github_url || "";
+  $("voluntary_self_identification").value = prefs.voluntary_self_identification || "decline";
   $("work_authorization").value = prefs.work_authorization || "";
   const comp = prefs.compensation || {};
   if (comp.floor != null) $("comp_floor").value = comp.floor;
@@ -162,10 +181,20 @@ function buildPreferences() {
       ? Number($("experience_years_tolerance").value)
       : 3,
     locations: {
-      type: $("location_type").value,
+      arrangements: [
+        $("arr_remote").checked ? "remote" : null,
+        $("arr_hybrid").checked ? "hybrid" : null,
+        $("arr_onsite").checked ? "onsite" : null,
+      ].filter(Boolean),
       hybrid_or_onsite_areas: splitList($("hybrid_areas").value),
       open_to_relocation: $("relocation").checked,
     },
+    profile: {
+      location: $("profile_location").value.trim(),
+      linkedin_url: $("profile_linkedin").value.trim(),
+      github_url: $("profile_github").value.trim(),
+    },
+    voluntary_self_identification: $("voluntary_self_identification").value,
     work_authorization: $("work_authorization").value,
     compensation: {
       currency: "USD",

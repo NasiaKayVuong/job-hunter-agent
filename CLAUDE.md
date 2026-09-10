@@ -55,12 +55,16 @@ once" override — if the user wants something submitted, they click it.
    and the explicit preference fields (location, comp floor, industries excluded,
    employment type, dealbreakers). Drop anything that fails an explicit
    dealbreaker or excluded industry outright.
-   - **Work arrangement.** `locations.type` is a hard filter, same weight as
-     an excluded industry: `"remote_only"` drops anything hybrid or onsite,
-     `"hybrid_only"` drops fully remote and fully onsite, `"onsite_only"`
-     drops remote and hybrid, `"any"` (the default) applies no filter here.
-     `hybrid_or_onsite_areas` still narrows which hybrid/onsite locations
-     count as a match; it's ignored when `type` is `"remote_only"`.
+   - **Work arrangement.** `locations.arrangements` is a hard filter, same
+     weight as an excluded industry. It's a list drawn from `"remote"`,
+     `"hybrid"`, `"onsite"`; a listing is kept only if its arrangement is in
+     the list (so `["remote", "hybrid"]` drops fully onsite roles,
+     `["hybrid", "onsite"]` drops fully remote ones, and so on). An empty or
+     missing list means open to any. Older files may instead carry
+     `locations.type` (`"remote_only"` / `"hybrid_only"` / `"onsite_only"` /
+     `"any"`) — read it as the equivalent one-item list (or all three for
+     `"any"`). `hybrid_or_onsite_areas` still narrows which hybrid/onsite
+     locations count as a match; it's ignored when the list is `["remote"]`.
    - **Companies excluded.** Drop any listing from a company in
      `preferences.json`'s `companies_excluded` outright, same as an excluded
      industry — a name match (case-insensitive substring is fine), no need to
@@ -249,6 +253,19 @@ once" override — if the user wants something submitted, they click it.
   `work_authorization` field if it's set (non-empty). If it's empty/not set,
   leave the question blank on the form and flag it clearly at the review-
   screen handoff — never guess someone's legal status.
+- Profile fields: `preferences.json`'s `profile.location` goes into any
+  city / location / "where are you based" field, `profile.linkedin_url` into
+  the LinkedIn field, and `profile.github_url` into any GitHub / portfolio /
+  website field. Any of them that is empty gets left blank on the form and
+  flagged at the review-screen handoff — never derive a location from the
+  resume or search for the user's profiles.
+- Voluntary self-identification (EEO: gender, race/ethnicity, veteran status,
+  disability): never enter a demographic answer yourself. Follow
+  `preferences.json`'s `voluntary_self_identification`: `"decline"` (the
+  default when unset) means choose the "Decline to self-identify" / "Prefer
+  not to say" / "I don't wish to answer" option on each such question;
+  `"user_fills"` means leave every one of them untouched and say so at the
+  review-screen handoff so the user can fill them in before submitting.
 - If a site requires solving a CAPTCHA or blocks automated form-filling, stop and
   tell the user rather than trying to work around it.
 - If the resume or preferences file is missing, ask the user to set them up via
