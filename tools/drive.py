@@ -161,23 +161,30 @@ def import_resume(file_id):
     return {"saved_as": safe_name, "source_file_id": file_id}
 
 
-def save_draft(local_path, name, kind, mimetype=None):
+def save_draft(local_path, name, kind, mimetype=None, as_doc=False):
     """Upload a local file into Drive as a brand-new file — create-only, never
     overwrites or modifies anything that already exists. `kind` is "resume"
     or "cover_letter" and determines which subfolder of Job Tracker it lands
-    in (see ensure_folders())."""
+    in (see ensure_folders()). With `as_doc=True`, a plain-text/markdown draft
+    is converted into a Google Doc on upload (so it previews and opens in
+    Drive) instead of being stored as an opaque binary file."""
     folder_key = {"resume": "resumes_folder_id", "cover_letter": "cover_letters_folder_id"}.get(kind)
     if not folder_key:
         raise ValueError('kind must be "resume" or "cover_letter"')
     parent_id = ensure_folders()[folder_key]
 
     local_path = Path(local_path)
-    mimetype = mimetype or "application/octet-stream"
+    body = {"name": name, "parents": [parent_id]}
+    if as_doc:
+        body["mimeType"] = "application/vnd.google-apps.document"
+        mimetype = mimetype or "text/plain"
+    else:
+        mimetype = mimetype or "application/octet-stream"
     media = MediaIoBaseUpload(io.BytesIO(local_path.read_bytes()), mimetype=mimetype)
     file = (
         _service()
         .files()
-        .create(body={"name": name, "parents": [parent_id]}, media_body=media, fields="id, name, webViewLink")
+        .create(body=body, media_body=media, fields="id, name, webViewLink")
         .execute()
     )
     return file
@@ -198,6 +205,8 @@ def main():
     p_save.add_argument("--name", required=True)
     p_save.add_argument("--kind", required=True, choices=["resume", "cover_letter"])
     p_save.add_argument("--mimetype", default=None)
+    p_save.add_argument("--as-doc", action="store_true",
+                        help="Convert a text/markdown draft into a Google Doc on upload (viewable in Drive)")
 
     args = parser.parse_args()
 
@@ -208,7 +217,7 @@ def main():
     elif args.command == "import-resume":
         result = import_resume(args.file_id)
     elif args.command == "save-draft":
-        result = save_draft(args.path, args.name, args.kind, args.mimetype)
+        result = save_draft(args.path, args.name, args.kind, args.mimetype, as_doc=args.as_doc)
     else:
         parser.error("unknown command")
         return
