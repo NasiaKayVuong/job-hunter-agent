@@ -410,3 +410,12 @@ th {
   background: var(--err-bg);
   color: var(--err-fg);
 }
+
+/* Always-visible troubleshooting hints. Deliberately NOT styled like an
+   error: these render whether or not anything is wrong, and in the error
+   colors they read as a live failure next to a "Connected" checkmark. */
+.callout-tip {
+  background: transparent;
+  color: var(--muted);
+  border: 1px dashed var(--border);
+}

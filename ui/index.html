@@ -237,7 +237,7 @@
         <li><strong>Create the OAuth client.</strong> Under "APIs &amp; Services → Credentials", create an OAuth client ID of type <strong>Desktop app</strong>, and download its JSON.</li>
         <li><strong>Upload that JSON file below.</strong></li>
       </ol>
-      <div class="callout callout-warn"><strong>Skipped step 2?</strong> You'll see "Access blocked" / Error 403 when connecting below. Go back and add your account as a Test user.</div>
+      <div class="callout callout-tip">Tip: if connecting below ever shows Google's "Access blocked" / Error 403 page, step 2 was skipped for the account you picked — add that account as a Test user and try again.</div>
       <p id="client-secret-status" class="status-line">Checking…</p>
       <input type="file" id="client-secret-file" accept=".json" />
       <button type="button" id="upload-client-secret-btn" class="secondary">Upload client secret</button>
@@ -246,7 +246,7 @@
     <section>
       <h2>2. Connect your account</h2>
       <p class="hint">One connection covers Calendar, Gmail (read-only search + draft creation, never send), Sheets, and Drive. See <code>CLAUDE.md</code> for exactly what is and isn't allowed with it (no sending email, no calendar invites, no editing files it didn't create).</p>
-      <div class="callout callout-warn"><strong>"Access blocked" / Error 403 here?</strong> The signed-in account isn't on the Test users list yet — go back to step 1 and add it.</div>
+      <div class="callout callout-tip">Tip: this is a static note, not a live error. If Google shows "Access blocked" / Error 403 during a connect, the account you signed in with isn't on the Test users list yet — add it in step 1 and reconnect.</div>
       <p id="google-status" class="status-line">Checking…</p>
       <button type="button" id="google-connect-btn">Connect Google account</button>
     </section>
