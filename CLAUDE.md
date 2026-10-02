@@ -51,6 +51,14 @@ once" override — if the user wants something submitted, they click it.
    user already said no); if "New"/"Interested"/"Applied", don't add a
    duplicate row, just skip it in the new results (mention in passing that it
    was already found before, if relevant).
+   - **Clearing old rows.** When the user asks to clear or clean up old
+     listings, run `python tools/listings.py clear --status Passed --status
+     Applied --dry-run` first, show them what would go, and only then run it
+     without `--dry-run`. Deletion is permanent apart from the Sheet's
+     version history. Applied rows are safe to clear because the real record
+     lives in the tracker; never clear Interested or New rows without being
+     told which ones. The app's Listings tab also has a "Hide Passed and
+     Applied" filter (on by default) for the non-destructive version.
 3. **Filter and rank.** Match against the resume (skills, seniority, experience)
    and the explicit preference fields (location, comp floor, industries excluded,
    employment type, dealbreakers). Drop anything that fails an explicit

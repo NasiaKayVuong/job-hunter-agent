@@ -419,3 +419,62 @@ th {
   color: var(--muted);
   border: 1px dashed var(--border);
 }
+
+/* ---------- Listings tab: toolbar + condensed table ---------- */
+/* Goal: the whole table fits the page width with no horizontal scroll.
+   Fixed layout + per-column widths make long values truncate with an
+   ellipsis; every truncated cell carries a title attribute (set in app.js)
+   so hovering shows the full text. */
+
+.listings-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.listings-count {
+  margin: 0;
+}
+
+table.condensed {
+  table-layout: fixed;
+  width: 100%;
+  font-size: 0.76rem;
+}
+
+table.condensed th,
+table.condensed td {
+  padding: 0.3rem 0.45rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+table.condensed td {
+  cursor: default;
+}
+
+/* Column widths. Title and Comp are deliberately tight: the notes column
+   takes whatever is left, and hover shows the full value. */
+table.condensed .col-found    { width: 5.2rem; }
+table.condensed .col-company  { width: 7.5rem; }
+table.condensed .col-title    { width: 11rem; }
+table.condensed .col-location { width: 8rem; }
+table.condensed .col-type     { width: 4rem; }
+table.condensed .col-comp     { width: 5.5rem; }
+table.condensed .col-source   { width: 6rem; }
+table.condensed .col-notes    { width: auto; }
+table.condensed .col-status   { width: 6.5rem; }
+table.condensed .col-link     { width: 3rem; }
+
+table.condensed select {
+  width: 100%;
+  font-size: 0.74rem;
+  padding: 0.15rem 0.2rem;
+}
+
+/* The old per-cell cap no longer applies inside the condensed table. */
+table.condensed .notes-cell {
+  max-width: none;
+}

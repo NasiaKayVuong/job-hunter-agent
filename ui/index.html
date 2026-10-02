@@ -257,9 +257,17 @@
     <section>
       <h2>Candidate listings</h2>
       <p class="hint">Jobs Claude has found during a search, before you've decided to apply. Mark ones you like as Interested, or Pass on ones you don't — tell Claude to draft materials for anything marked Interested whenever you're ready.</p>
-      <button type="button" id="refresh-listings-btn" class="secondary">Refresh</button>
+      <div class="listings-toolbar">
+        <button type="button" id="refresh-listings-btn" class="secondary">Refresh</button>
+        <label class="checkbox"><input type="checkbox" id="hide-done-listings-chk"> Hide Passed and Applied</label>
+        <span class="hint listings-count" id="listings-count"></span>
+      </div>
       <div class="table-wrap">
-        <table id="listings-table">
+        <table id="listings-table" class="condensed">
+          <colgroup>
+            <col class="col-found"><col class="col-company"><col class="col-title"><col class="col-location">
+            <col class="col-type"><col class="col-comp"><col class="col-source"><col class="col-notes"><col class="col-status"><col class="col-link">
+          </colgroup>
           <thead>
             <tr>
               <th>Found</th><th>Company</th><th>Title</th><th>Location</th>

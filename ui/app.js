@@ -607,6 +607,10 @@ function listingStatusSelect(row, currentStatus) {
       const data = await res.json();
       if (data.error) throw new Error(data.error);
       showStatus(`Marked "${select.value}".`, "ok");
+      const cached = listingRows.find((r) => r.row === row);
+      if (cached) cached.status = select.value;
+      // With the hide filter on, a row just marked Passed/Applied drops out.
+      if (hideDoneListings() && HIDDEN_LISTING_STATUSES.has(select.value)) renderListings();
     } catch (e) {
       showStatus("Couldn't update status: " + e.message, "err");
     } finally {
@@ -616,11 +620,43 @@ function listingStatusSelect(row, currentStatus) {
   return select;
 }
 
+// ---------- Hide Passed/Applied filter ----------
+// Client-side only: the rows stay in the Sheet (and in `listingRows`); the
+// table just stops drawing them. On by default; the choice persists.
+
+const HIDDEN_LISTING_STATUSES = new Set(["Passed", "Applied"]);
+let listingRows = [];
+
+function hideDoneListings() {
+  return $("hide-done-listings-chk").checked;
+}
+
+(function initHideDoneListings() {
+  let hide = true;
+  try {
+    const saved = localStorage.getItem("jha-hide-done-listings");
+    if (saved !== null) hide = saved === "1";
+  } catch (e) {
+    // localStorage unavailable: default to hiding, no big deal.
+  }
+  $("hide-done-listings-chk").checked = hide;
+})();
+
+$("hide-done-listings-chk").addEventListener("change", () => {
+  try {
+    localStorage.setItem("jha-hide-done-listings", hideDoneListings() ? "1" : "0");
+  } catch (e) {
+    // Fine if this doesn't persist; it still applies for the current session.
+  }
+  renderListings();
+});
+
 async function loadListings() {
   const tbody = document.querySelector("#listings-table tbody");
   const empty = $("listings-empty");
   tbody.innerHTML = "";
   empty.hidden = true;
+  $("listings-count").textContent = "";
   try {
     const res = await fetch("/api/listings");
     const data = await res.json();
@@ -629,17 +665,47 @@ async function loadListings() {
       empty.hidden = false;
       return;
     }
-    const rows = data.listings || [];
-    if (rows.length === 0) {
-      empty.hidden = false;
-      return;
-    }
+    listingRows = data.listings || [];
+    renderListings();
+  } catch (e) {
+    empty.textContent = "Couldn't load listings: " + e.message;
+    empty.hidden = false;
+  }
+}
+
+// Draws `listingRows` through the hide filter. Every text cell gets a title
+// attribute, so anything the condensed columns cut off shows in full on hover.
+function renderListings() {
+  const tbody = document.querySelector("#listings-table tbody");
+  const empty = $("listings-empty");
+  const count = $("listings-count");
+  tbody.innerHTML = "";
+  empty.hidden = true;
+  count.textContent = "";
+  if (listingRows.length === 0) {
+    empty.textContent = "No listings yet — ask Claude to find some jobs.";
+    empty.hidden = false;
+    return;
+  }
+  const hide = hideDoneListings();
+  const rows = hide ? listingRows.filter((r) => !HIDDEN_LISTING_STATUSES.has(r.status)) : listingRows;
+  const hiddenCount = listingRows.length - rows.length;
+  count.textContent = hiddenCount > 0
+    ? `Showing ${rows.length} of ${listingRows.length} (${hiddenCount} Passed/Applied hidden)`
+    : `Showing ${rows.length}`;
+  if (rows.length === 0) {
+    empty.textContent = `All ${listingRows.length} listings are Passed or Applied — untick "Hide Passed and Applied" to see them.`;
+    empty.hidden = false;
+    return;
+  }
+  {
     for (const r of rows) {
       const tr = document.createElement("tr");
       const cells = [r.date_found, r.company, r.title, r.location, r.job_type, r.comp_range, r.source];
       for (const c of cells) {
         const td = document.createElement("td");
         td.textContent = c || "";
+        if (c) td.title = c;
         tr.appendChild(td);
       }
       const notesTd = document.createElement("td");
@@ -662,9 +728,6 @@ async function loadListings() {
       tr.appendChild(linkTd);
       tbody.appendChild(tr);
     }
-  } catch (e) {
-    empty.textContent = "Couldn't load listings: " + e.message;
-    empty.hidden = false;
   }
 }
 

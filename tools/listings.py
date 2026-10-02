@@ -24,6 +24,9 @@ Usage:
       [--match-notes ...] [--status "New"]
   python tools/listings.py update-status --row N --status "Interested"
   python tools/listings.py list
+  python tools/listings.py clear --status Passed [--status Applied] [--dry-run]
+      (deletes every row with one of those statuses; recoverable only from
+      the Sheet's version history, so run --dry-run first)
 """
 
 import argparse
@@ -113,6 +116,48 @@ def list_listings():
     return out
 
 
+def clear_listings(statuses, dry_run=False):
+    """Delete every Listings row whose status is in `statuses`.
+
+    Rows are removed bottom-up in a single batchUpdate so row numbers stay
+    valid throughout. Returns what was (or would be) deleted and how many
+    rows remain. Deletion is permanent apart from the Sheet's version
+    history, so callers should dry-run first and confirm with the user.
+    """
+    wanted = {s.strip().lower() for s in statuses}
+    spreadsheet_id = ensure_listings_tab()
+    service = _sheets()
+    rows = list_listings()
+    targets = [r for r in rows if r["status"].strip().lower() in wanted]
+    if targets and not dry_run:
+        meta = service.spreadsheets().get(spreadsheetId=spreadsheet_id, fields="sheets.properties").execute()
+        sheet_id = next(
+            s["properties"]["sheetId"] for s in meta["sheets"] if s["properties"]["title"] == TAB_TITLE
+        )
+        requests = [
+            {
+                "deleteDimension": {
+                    "range": {
+                        "sheetId": sheet_id,
+                        "dimension": "ROWS",
+                        "startIndex": r["row"] - 1,  # 0-based; the header is index 0
+                        "endIndex": r["row"],
+                    }
+                }
+            }
+            for r in sorted(targets, key=lambda r: r["row"], reverse=True)
+        ]
+        service.spreadsheets().batchUpdate(spreadsheetId=spreadsheet_id, body={"requests": requests}).execute()
+    return {
+        "dry_run": dry_run,
+        "statuses": sorted(wanted),
+        "deleted": [
+            {"row": r["row"], "company": r["company"], "title": r["title"], "status": r["status"]} for r in targets
+        ],
+        "remaining": len(rows) - len(targets),
+    }
+
+
 def update_status(row_number, status):
     spreadsheet_id = ensure_listings_tab()
     _sheets().spreadsheets().values().update(
@@ -146,6 +191,15 @@ def main():
 
     sub.add_parser("list", help="Print all candidate listings as JSON")
 
+    p_clear = sub.add_parser("clear", help="Delete every listing with the given status(es)")
+    p_clear.add_argument(
+        "--status",
+        action="append",
+        required=True,
+        help="Status to clear (repeatable), e.g. --status Passed --status Applied",
+    )
+    p_clear.add_argument("--dry-run", action="store_true", help="Show what would be deleted; change nothing")
+
     args = parser.parse_args()
 
     if args.command == "add":
@@ -167,6 +221,8 @@ def main():
         result = update_status(args.row, args.status)
     elif args.command == "list":
         result = list_listings()
+    elif args.command == "clear":
+        result = clear_listings(args.status, dry_run=args.dry_run)
     else:
         parser.error("unknown command")
         return
