@@ -295,6 +295,7 @@ once" override — if the user wants something submitted, they click it.
   or delete a file in the user's Drive that this tool didn't itself create.
 - `tools/listings.py` is a shortlist, not the tracker — a row there being
   "Interested" doesn't mean an application exists yet, and a row being
-  "Passed" doesn't need to be deleted (there's no delete function; leave it).
+  "Passed" doesn't need to be deleted (the app hides Passed/Applied rows by
+  default; `clear` exists for when the user explicitly asks, dry-run first).
   Only `tools/tracker.py add` creates a real tracked application, and only
   after the user confirms an actual submission.
