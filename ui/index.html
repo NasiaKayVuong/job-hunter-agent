@@ -264,16 +264,10 @@
       </div>
       <div class="table-wrap">
         <table id="listings-table" class="condensed">
-          <colgroup>
-            <col class="col-found"><col class="col-company"><col class="col-title"><col class="col-location">
-            <col class="col-type"><col class="col-comp"><col class="col-source"><col class="col-notes"><col class="col-status"><col class="col-link">
-          </colgroup>
-          <thead>
-            <tr>
-              <th>Found</th><th>Company</th><th>Title</th><th>Location</th>
-              <th>Type</th><th>Comp</th><th>Source</th><th>Match notes</th><th>Status</th><th></th>
-            </tr>
-          </thead>
+          <!-- colgroup and thead are built by renderListings() in app.js: the
+               column set and widths depend on compact vs expanded view. -->
+          <colgroup></colgroup>
+          <thead></thead>
           <tbody></tbody>
         </table>
       </div>

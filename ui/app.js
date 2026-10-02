@@ -32,6 +32,8 @@ $("toggle-width-btn").addEventListener("click", () => {
   } catch (e) {
     // Fine if this doesn't persist — it still works for the current session.
   }
+  // The Listings table shows a different column set per view.
+  if (listingRows.length) renderListings();
 });
 
 // ---------- Light/dark theme toggle ----------
@@ -673,12 +675,54 @@ async function loadListings() {
   }
 }
 
+// Listings table columns. Widths are percentages that sum to 100 per view,
+// so the table is exactly the page width and never scrolls sideways. The
+// compact (720px) view leaves out Found and Source so the rest stay legible.
+const LISTING_COLUMNS = [
+  { key: "date_found", label: "Found", wide: 7, compact: null },
+  { key: "company", label: "Company", wide: 11, compact: 14 },
+  { key: "title", label: "Title", wide: 16, compact: 19 },
+  { key: "location", label: "Location", wide: 12, compact: 14 },
+  { key: "job_type", label: "Type", wide: 6, compact: 8 },
+  { key: "comp_range", label: "Comp", wide: 8, compact: 10 },
+  { key: "source", label: "Source", wide: 8, compact: null },
+  { key: "match_notes", label: "Match notes", wide: 19, compact: 17 },
+  { key: "status", label: "Status", wide: 9, compact: 13 },
+  { key: "link", label: "", wide: 4, compact: 5 },
+];
+
+function activeListingColumns() {
+  const wide = document.querySelector(".app").classList.contains("wide");
+  return LISTING_COLUMNS.filter((c) => (wide ? c.wide : c.compact) !== null).map((c) => ({
+    ...c,
+    width: wide ? c.wide : c.compact,
+  }));
+}
+
 // Draws `listingRows` through the hide filter. Every text cell gets a title
 // attribute, so anything the condensed columns cut off shows in full on hover.
 function renderListings() {
-  const tbody = document.querySelector("#listings-table tbody");
+  const table = $("listings-table");
+  const tbody = table.querySelector("tbody");
   const empty = $("listings-empty");
   const count = $("listings-count");
+  const columns = activeListingColumns();
+
+  const colgroup = table.querySelector("colgroup");
+  colgroup.innerHTML = "";
+  const headRow = document.createElement("tr");
+  for (const c of columns) {
+    const col = document.createElement("col");
+    col.style.width = c.width + "%";
+    colgroup.appendChild(col);
+    const th = document.createElement("th");
+    th.textContent = c.label;
+    headRow.appendChild(th);
+  }
+  const thead = table.querySelector("thead");
+  thead.innerHTML = "";
+  thead.appendChild(headRow);
+
   tbody.innerHTML = "";
   empty.hidden = true;
   count.textContent = "";
@@ -698,36 +742,30 @@ function renderListings() {
     empty.hidden = false;
     return;
   }
-  {
-    for (const r of rows) {
-      const tr = document.createElement("tr");
-      const cells = [r.date_found, r.company, r.title, r.location, r.job_type, r.comp_range, r.source];
-      for (const c of cells) {
-        const td = document.createElement("td");
-        td.textContent = c || "";
-        if (c) td.title = c;
-        tr.appendChild(td);
+  for (const r of rows) {
+    const tr = document.createElement("tr");
+    for (const c of columns) {
+      const td = document.createElement("td");
+      if (c.key === "status") {
+        td.appendChild(listingStatusSelect(r.row, r.status));
+      } else if (c.key === "link") {
+        if (r.url) {
+          const a = document.createElement("a");
+          a.href = r.url;
+          a.target = "_blank";
+          a.rel = "noopener";
+          a.textContent = "Open";
+          td.appendChild(a);
+        }
+      } else {
+        const value = r[c.key] || "";
+        td.textContent = value;
+        if (value) td.title = value; // full text on hover when the column cuts it off
+        if (c.key === "match_notes") td.className = "notes-cell";
       }
-      const notesTd = document.createElement("td");
-      notesTd.className = "notes-cell";
-      notesTd.textContent = r.match_notes || "";
-      if (r.match_notes) notesTd.title = r.match_notes;
-      tr.appendChild(notesTd);
-      const statusTd = document.createElement("td");
-      statusTd.appendChild(listingStatusSelect(r.row, r.status));
-      tr.appendChild(statusTd);
-      const linkTd = document.createElement("td");
-      if (r.url) {
-        const a = document.createElement("a");
-        a.href = r.url;
-        a.target = "_blank";
-        a.rel = "noopener";
-        a.textContent = "Open";
-        linkTd.appendChild(a);
-      }
-      tr.appendChild(linkTd);
-      tbody.appendChild(tr);
+      tr.appendChild(td);
     }
+    tbody.appendChild(tr);
   }
 }
 

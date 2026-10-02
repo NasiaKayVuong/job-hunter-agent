@@ -461,33 +461,11 @@ table.condensed td {
   cursor: default;
 }
 
-/* Column widths. Title and Comp are deliberately tight: the notes column
-   takes whatever is left, and hover shows the full value. */
-/* Percentages (sum 100) so the table is exactly the page width in both the
-   compact and the expanded view; nothing ever scrolls sideways. */
-table.condensed .col-found    { width: 7%; }
-table.condensed .col-company  { width: 11%; }
-table.condensed .col-title    { width: 16%; }
-table.condensed .col-location { width: 12%; }
-table.condensed .col-type     { width: 6%; }
-table.condensed .col-comp     { width: 8%; }
-table.condensed .col-source   { width: 8%; }
-table.condensed .col-notes    { width: 19%; }
-table.condensed .col-status   { width: 9%; }
-table.condensed .col-link     { width: 4%; }
-
-/* Compact (720px) view: ten columns cannot all be legible, so drop the two
-   least useful ones, Found (1) and Source (7). Expand view shows them all. */
-.app:not(.wide) table.condensed col.col-found,
-.app:not(.wide) table.condensed col.col-source {
-  visibility: collapse;
-}
-.app:not(.wide) table.condensed th:nth-child(1),
-.app:not(.wide) table.condensed td:nth-child(1),
-.app:not(.wide) table.condensed th:nth-child(7),
-.app:not(.wide) table.condensed td:nth-child(7) {
-  display: none;
-}
+/* Column widths are percentages set on <col> elements by renderListings()
+   in app.js (they sum to 100, so the table is exactly the page width in
+   both views). Title and Comp are deliberately tight; Match notes takes the
+   largest share; hover shows any cut-off value in full. In the compact
+   view the Found and Source columns are left out so the rest stay legible. */
 
 table.condensed select {
   width: 100%;
