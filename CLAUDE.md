@@ -144,6 +144,13 @@ once" override — if the user wants something submitted, they click it.
    the job board it's actually hosted on) and fill in the form: contact info,
    resume upload, cover letter, and any screener questions, using the drafted
    materials. Stop at the review screen. Screenshot it. Hand it to the user.
+   - **Upload the resume FIRST, then type.** Found 2026-10-11 on Sierra's
+     Ashby form, reproduced on purpose: attaching the resume re-renders
+     the form and wipes every text value entered before it. This was the
+     real cause of "fields not registering" all day. Order on every form:
+     resume (and cover letter file) upload, wait for the filename to show,
+     then text fields, then radios and selects. Verify at the end by
+     reading each field's value length from the page.
    - **Type every text value with real keystrokes.** The user's standing
      instruction (2026-10-11, repeated three times): for each text input
      and textarea, click into the field, select all (ctrl+a), and type the
