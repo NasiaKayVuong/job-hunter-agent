@@ -289,6 +289,8 @@ once" override — if the user wants something submitted, they click it.
   `work_authorization` field if it's set (non-empty). If it's empty/not set,
   leave the question blank on the form and flag it clearly at the review-
   screen handoff — never guess someone's legal status.
+- Phone country code: when a form has a country selector next to the phone
+  field, set it to United States (user instruction 2026-10-11).
 - Profile fields: `preferences.json`'s `profile.location` goes into any
   city / location / "where are you based" field, `profile.linkedin_url` into
   the LinkedIn field, and `profile.github_url` into any GitHub / portfolio /
@@ -296,7 +298,12 @@ once" override — if the user wants something submitted, they click it.
   flagged at the review-screen handoff — never derive a location from the
   resume or search for the user's profiles.
 - Voluntary self-identification (EEO: gender, race/ethnicity, veteran status,
-  disability): never enter a demographic answer yourself. Follow
+  disability): never enter a demographic answer yourself. The user's
+  standing instruction (2026-10-11): on every such question, on every
+  form, including sections marked voluntary or optional, select "I don't
+  wish to self-identify" / "Decline to self-identify" / "I don't wish to
+  answer" / "Prefer not to say", whichever that form offers. Do not leave
+  them blank for her. Pronouns are not EEO; leave those for her. Follow
   `preferences.json`'s `voluntary_self_identification`: `"decline"` (the
   default when unset) means choose the "Decline to self-identify" / "Prefer
   not to say" / "I don't wish to answer" option on each such question;
