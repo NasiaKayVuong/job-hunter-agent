@@ -153,8 +153,8 @@ once" override — if the user wants something submitted, they click it.
      Do the click+Tab pass before the review screenshot and say in the
      handoff that it was done. Greenhouse's newer select widgets need
      click, type the option text, Enter; Ashby location/country comboboxes
-     and Yes/No buttons need a coordinate click after a fresh screenshot. Greenhouse's newer select widgets need click, type the
-     option text, Enter. Do not close any tab in the browser tool's tab group
+     and Yes/No buttons need a coordinate click after a fresh screenshot.
+     Do not close any tab in the browser tool's tab group
      mid-run: Chrome drops the whole group and the other filled forms become
      unreachable.
 7. **Log.** Append an entry to `applications/log.md` for every search run and
