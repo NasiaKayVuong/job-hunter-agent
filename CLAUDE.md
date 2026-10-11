@@ -144,12 +144,16 @@ once" override — if the user wants something submitted, they click it.
    the job board it's actually hosted on) and fill in the form: contact info,
    resume upload, cover letter, and any screener questions, using the drafted
    materials. Stop at the review screen. Screenshot it. Hand it to the user.
-   - **Make text fields register.** Setting a value with `form_input` does
-     not fire the input event that Ashby, Greenhouse, Lever, and similar
-     React forms listen for, so the field can look empty to the user until
-     it is focused. For text inputs and textareas, click the field and type
-     the value, or follow each `form_input` with a click on the field and a
-     Tab keypress. Greenhouse's newer select widgets need click, type the
+   - **Click into every text field, always.** The user's standing
+     instruction (2026-10-11, repeated): after filling, physically click
+     into each text input and textarea that holds a value and press Tab,
+     on every form, no matter how the value was set (`form_input`, a page
+     script, or typing). Setting a value any other way can leave the field
+     looking empty to her until it is focused, and she checks for this.
+     Do the click+Tab pass before the review screenshot and say in the
+     handoff that it was done. Greenhouse's newer select widgets need
+     click, type the option text, Enter; Ashby location/country comboboxes
+     and Yes/No buttons need a coordinate click after a fresh screenshot. Greenhouse's newer select widgets need click, type the
      option text, Enter. Do not close any tab in the browser tool's tab group
      mid-run: Chrome drops the whole group and the other filled forms become
      unreachable.
