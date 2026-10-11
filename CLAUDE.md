@@ -114,11 +114,39 @@ once" override — if the user wants something submitted, they click it.
    `applications/<company>-<role-slug>/`. Tailor emphasis and phrasing to the
    posting; never invent experience, skills, or accomplishments that aren't
    grounded in the source resume.
+   - **No fabricated experience, in any form.** The user said so directly
+     (2026-10-01) after a letter claimed GraphQL and invented process
+     framing. The only sources for a claim are the resume in `data/resume/`,
+     facts the user states in chat, and prior drafts the user has already
+     submitted unchanged. Do not infer how work was assigned, who asked for
+     it, what process the team used, what the user enjoys, or how they like
+     to be interviewed. Do not list a technology from the posting as theirs
+     unless the resume lists it. If a posting asks for something the record
+     does not cover, leave it out or leave the field for the user.
+     Before a letter or essay goes into a form, check it sentence by
+     sentence against those sources.
+   - **No negatives, no unfamiliar tech.** The user said so (2026-10-01):
+     cover letters and form answers never state a gap ("I have not worked
+     with Go", "Python is not my primary back end", "I would say that
+     plainly"). Technology the resume does not list is simply not mentioned.
+     Write only what the user has done.
+   - **Never mention this tool.** The user does not want the job-hunter
+     agent or its repository referenced in any letter, essay, project
+     link, or AI-use answer written as them.
 6. **Autofill.** Using claude-in-chrome, navigate to the job's original
    application page (the company's own site if the posting is there, otherwise
    the job board it's actually hosted on) and fill in the form: contact info,
    resume upload, cover letter, and any screener questions, using the drafted
    materials. Stop at the review screen. Screenshot it. Hand it to the user.
+   - **Make text fields register.** Setting a value with `form_input` does
+     not fire the input event that Ashby, Greenhouse, Lever, and similar
+     React forms listen for, so the field can look empty to the user until
+     it is focused. For text inputs and textareas, click the field and type
+     the value, or follow each `form_input` with a click on the field and a
+     Tab keypress. Greenhouse's newer select widgets need click, type the
+     option text, Enter. Do not close any tab in the browser tool's tab group
+     mid-run: Chrome drops the whole group and the other filled forms become
+     unreachable.
 7. **Log.** Append an entry to `applications/log.md` for every search run and
    every drafted/autofilled application: what was searched, what was found, what
    was drafted, what was filled in and where it stopped. This is the user's audit
