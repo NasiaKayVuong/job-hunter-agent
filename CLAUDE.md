@@ -51,6 +51,12 @@ once" override — if the user wants something submitted, they click it.
    user already said no); if "New"/"Interested"/"Applied", don't add a
    duplicate row, just skip it in the new results (mention in passing that it
    was already found before, if relevant).
+   - **Row numbers shift.** `clear` deletes sheet rows, so every row below
+     a deleted one moves up. After any `clear` (or any deletion in the
+     Sheet), run `listings.py list` again before calling `update-status
+     --row`. Numbers from an earlier listing are stale and hit the wrong
+     row (this deleted four fresh listings on 2026-10-11; they were
+     re-added).
    - **Clearing old rows.** When the user asks to clear or clean up old
      listings, run `python tools/listings.py clear --status Passed --status
      Applied --dry-run` first, show them what would go, and only then run it
