@@ -144,14 +144,15 @@ once" override — if the user wants something submitted, they click it.
    the job board it's actually hosted on) and fill in the form: contact info,
    resume upload, cover letter, and any screener questions, using the drafted
    materials. Stop at the review screen. Screenshot it. Hand it to the user.
-   - **Click into every text field, always.** The user's standing
-     instruction (2026-10-11, repeated): after filling, physically click
-     into each text input and textarea that holds a value and press Tab,
-     on every form, no matter how the value was set (`form_input`, a page
-     script, or typing). Setting a value any other way can leave the field
-     looking empty to her until it is focused, and she checks for this.
-     Do the click+Tab pass before the review screenshot and say in the
-     handoff that it was done. Greenhouse's newer select widgets need
+   - **Type every text value with real keystrokes.** The user's standing
+     instruction (2026-10-11, repeated three times): for each text input
+     and textarea, click into the field, select all (ctrl+a), and type the
+     value with the `type` action, then press Tab. Do not rely on
+     `form_input` or a page script that sets `.value` and fires events:
+     both left fields that she saw as not registered, even after a
+     click+Tab pass. Long answers and pasted letters are typed too. Do
+     this before the review screenshot and say in the handoff that it
+     was done. Greenhouse's newer select widgets need
      click, type the option text, Enter; Ashby location/country comboboxes
      and Yes/No buttons need a coordinate click after a fresh screenshot.
      Do not close any tab in the browser tool's tab group
