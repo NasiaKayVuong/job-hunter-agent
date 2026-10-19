@@ -144,6 +144,13 @@ once" override — if the user wants something submitted, they click it.
    the job board it's actually hosted on) and fill in the form: contact info,
    resume upload, cover letter, and any screener questions, using the drafted
    materials. Stop at the review screen. Screenshot it. Hand it to the user.
+   - **After the upload, wait, then click by coordinates.** (2026-10-19)
+     The re-render from the resume upload arrives a few seconds after the
+     tool reports success; wait and screenshot before typing. After that
+     re-render, clicks by element reference on Ashby inputs stop focusing
+     the field even though `find` still returns the same refs: click by
+     coordinates from a fresh screenshot instead, one field per
+     coordinate, and re-screenshot whenever the page could have shifted.
    - **Upload the resume FIRST, then type.** Found 2026-10-11 on Sierra's
      Ashby form, reproduced on purpose: attaching the resume re-renders
      the form and wipes every text value entered before it. This was the
